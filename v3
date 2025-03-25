@@ -1,0 +1,74 @@
+import tkinter as tk
+from tkinter import PhotoImage
+
+def on_submit():
+    for widget in root.winfo_children():
+        widget.destroy()
+    bg_image = tk.Label(root, image=grid_image_path)
+    bg_image.place(relheight=1, relwidth=1)
+    
+    # Creăm un nou cadru pentru opțiuni
+    options_frame = tk.Frame(bg_image, bg='#711adf')
+    options_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+    options_label = tk.Label(options_frame, text="Learn to code in...", font=('Gill Sans Ultra Bold', 20), fg='#1b219d')
+    options_label.pack(pady=20)
+    options = ["C++", "Python", "JavaScript"]
+    for option in options:
+        option_button = tk.Button(options_frame, text=option, font=('Gill Sans Ultra Bold', 14), fg='white', bg='#180451')
+        option_button.pack(pady=10)
+
+def show_grid():
+    for widget in root.winfo_children():
+        widget.destroy()
+    
+    # Fundalul pentru grid
+    grid_bg_image = tk.Label(root, image=grid_image_path)
+    grid_bg_image.place(relheight=1, relwidth=1)
+
+    container = tk.Frame(grid_bg_image)
+    container.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
+    for i in range(2):
+        container.grid_rowconfigure(i, weight=1)
+    for i in range(3):
+        container.grid_columnconfigure(i, weight=1)
+
+    title0 = tk.Label(grid_bg_image, text="Welcome to Cosmiccode!", font=('Gill Sans Ultra Bold', 17), fg='#1b219d', bg='#711adf')
+    title0.grid(row=1, column=7, padx=5, pady=5)
+
+    title1 = tk.Label(grid_bg_image, text="Enter your username and password and let's start a cosmic game!", font=('Gill Sans Ultra Bold', 17), fg='#1b219d', bg='#711adf')
+    title1.grid(row=2, column=7, padx=5, pady=5)
+
+    user_label = tk.Label(grid_bg_image, text='Username', font=('Gill Sans Ultra Bold', 16), fg='#1b219d', bg='#711adf')
+    user_label.grid(row=3, column=6, padx=5, pady=5)
+
+    username = tk.Entry(grid_bg_image, font=('Stencil', 16), fg='white', bg='#180451')
+    username.grid(row=3, column=7, padx=5, pady=5)
+
+    user_password = tk.Label(grid_bg_image, text='Password', font=('Gill Sans Ultra Bold', 16), fg='#1b219d', bg='#711adf')
+    user_password.grid(row=4, column=6, padx=5, pady=5)
+
+    password = tk.Entry(grid_bg_image, font=('Stencil', 16), fg='white', bg='#180451', show='*')
+    password.grid(row=4, column=7, padx=10, pady=10)
+
+    submit = tk.Button(grid_bg_image, text='Submit', font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=on_submit)
+    submit.grid(row=5, column=7,sticky=tk.E + tk.W)
+
+    grid_image_path.grid_propagate(False)
+
+def initial_image():
+    bg_image = tk.Label(root, image=image_path)
+    bg_image.place(relheight=1, relwidth=1)
+
+root = tk.Tk()
+root.geometry('2480x3508')
+root.title('Welcome to app!')
+
+grid_image_path = PhotoImage(file=r"C:\Users\Adriana\Desktop\Altele\Captură de ecran din 2025-03-14 la 16.12.48.png")
+image_path = PhotoImage(file=r"C:\Users\Adriana\Downloads\cosmiccode.png")
+
+initial_image()
+
+root.after(3000, show_grid)
+
+root.mainloop()

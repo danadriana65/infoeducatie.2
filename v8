@@ -1,0 +1,101 @@
+import tkinter as tk
+from tkinter import PhotoImage
+
+def on_submit():
+    for widget in root.winfo_children():
+        widget.destroy()
+    bg_image = tk.Label(root, image=grid_image_path)
+    bg_image.place(relheight=1, relwidth=1)
+    # Frame for coding options
+    options_frame = tk.Frame(bg_image, bg='#711adf')
+    options_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+    options_label = tk.Label(options_frame, text="Learn to code in...", font=('Gill Sans Ultra Bold', 20), fg='#1b219d')
+    options_label.pack(pady=20)
+    options = ["C++", "Python", "JavaScript"]
+    
+    for option in options:
+        option_button = tk.Button(options_frame, text=option, font=('Gill Sans Ultra Bold', 14), fg='white', bg='#180451', command=lambda opt=option: navigate_to_page(opt))
+        option_button.pack(pady=10)
+
+def show_grid():
+    for widget in root.winfo_children():
+        widget.destroy()
+    
+    # Background for grid
+    grid_bg_image = tk.Label(root, image=grid_image_path)
+    grid_bg_image.place(relheight=1, relwidth=1)
+
+    
+
+    container = tk.Frame(grid_bg_image)
+    container.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
+    # Titles and form
+    title0 = tk.Label(container, text="Welcome to Cosmiccode!", font=('Gill Sans Ultra Bold', 17), fg='#1b219d', bg='#711adf')
+    title0.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="n")
+
+    title1 = tk.Label(container, text="Enter your username and password and let's start a cosmic game!", font=('Gill Sans Ultra Bold', 12), fg='#1b219d', bg='#711adf', wraplength=400)
+    title1.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky="n")
+
+    user_label = tk.Label(container, text='Username', font=('Gill Sans Ultra Bold', 12), fg='#1b219d', bg='#711adf')
+    user_label.grid(row=2, column=0, padx=5, pady=5, sticky="e")
+
+    username = tk.Entry(container, font=('Stencil', 12), fg='white', bg='#180451')
+    username.grid(row=2, column=1, padx=5, pady=5, sticky="w")
+
+    user_password = tk.Label(container, text='Password', font=('Gill Sans Ultra Bold', 12), fg='#1b219d', bg='#711adf')
+    user_password.grid(row=3, column=0, padx=5, pady=5, sticky="e")
+
+    password = tk.Entry(container, font=('Stencil', 12), fg='white', bg='#180451', show='*')
+    password.grid(row=3, column=1, padx=5, pady=5, sticky="w")
+
+    submit = tk.Button(container, text='Submit', font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=on_submit)
+    submit.grid(row=4, column=0, columnspan=2, padx=10, pady=20, sticky="ew")
+   
+
+def navigate_to_page(option):
+    for widget in root.winfo_children():
+        widget.destroy()
+    
+    # Background for planet buttons
+    last_page_image = PhotoImage(file=r"C:\Users\Adriana\Desktop\Altele\Captură de ecran din 2025-03-14 la 16.12.48.png")  # Background image
+    last_page_bg = tk.Label(root, image=last_page_image)
+    last_page_bg.image = last_page_image  # Keep a reference to prevent garbage collection
+    last_page_bg.place(relheight=1, relwidth=1)
+    
+    # Example planet images
+    planet_images = {
+        "Planet A": PhotoImage(file=r"C:\Users\Adriana\AppData\Local\Temp\59262d90-f7f9-497f-aba0-99d48a24949f_iloveimg-converted.zip.49f\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.4.png"),
+        "Planet B": PhotoImage(file=r"C:\Users\Adriana\AppData\Local\Temp\efb8956f-63b9-4f0e-9ef5-1d2978907fe6_iloveimg-converted.zip.fe6\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.3.png"),
+        "Planet C": PhotoImage(file=r"C:\Users\Adriana\AppData\Local\Temp\4f0731ba-0f37-4557-b400-700d89710775_iloveimg-converted.zip.775\WhatsApp Image 2025-03-15 at 22.57.57_426e474f1.2.png"),
+    }
+
+    # Add planet buttons directly on the background image
+    column = 0
+    for planet_name, planet_image in planet_images.items():
+        # Create a button with a planet image
+        planet_button = tk.Button(last_page_bg, image=planet_image, command=lambda name=planet_name: print(f"{name} clicked!"), borderwidth=0, bg='#711adf', activebackground='#711adf')
+        planet_button.image = planet_image  # Keep a reference
+        planet_button.place(relx=0.3 + (column * 0.2), rely=0.5, anchor=tk.CENTER)  # Adjust placement
+        column += 1
+
+    # Display selected language
+    message_label = tk.Label(last_page_bg, text=f"You selected {option}. Explore planets below!", font=('Gill Sans Ultra Bold', 20), fg='#1b219d', bg='#711adf')
+    message_label.place(relx=0.5, rely=0.85, anchor=tk.CENTER)
+
+def initial_image():
+    bg_image = tk.Label(root, image=image_path)
+    bg_image.place(relheight=1, relwidth=1)
+
+root = tk.Tk()
+root.geometry('900x600')  # Adjust for practical size
+root.title('Welcome to app!')
+
+grid_image_path = PhotoImage(file=r"C:\Users\Adriana\Desktop\Altele\Captură de ecran din 2025-03-14 la 16.12.48.png")
+image_path = PhotoImage(file=r"C:\Users\Adriana\Downloads\WhatsApp Image 2025-03-15 at 18.33.30_eeff6e0f.png")
+
+initial_image()
+
+root.after(3000, show_grid)
+
+root.mainloop()
