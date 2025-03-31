@@ -1,46 +1,22 @@
 import tkinter as tk
 from tkinter import PhotoImage
-
+from tkVideoPlayer import TkinterVideo  # Ensure this library is installed
 
 # Define a global variable to store the username
 user_input = ""
 
-def on_submit():
+def play_video():
     for widget in root.winfo_children():
         widget.destroy()
-    bg_image = tk.Label(root, image=grid_image_path)
-    bg_image.place(relheight=1, relwidth=1)
-    
-    # Frame for coding options
-    options_frame = tk.Frame(bg_image, bg='#711adf')
-    options_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-    options_label = tk.Label(options_frame, text="Learn to code in...", font=('Gill Sans Ultra Bold', 24), fg='#1b219d', bg='#711adf')
-    options_label.pack(pady=20)
-    options = ["C++", "Python", "JavaScript"]
-    
-    button_width = 20
-    button_height = 2
 
-    for option in options:
-        option_button = tk.Button(
-            options_frame,
-            text=option,
-            font=('Gill Sans Ultra Bold', 14),
-            fg='white',
-            bg='#180451',
-            command=lambda opt=option: navigate_to_page(opt),
-            width=button_width,
-            height=button_height
-        )
-        option_button.pack(pady=10)
+    # Create video player
+    videoplayer = TkinterVideo(master=root, scaled=True)
+    videoplayer.load(r"C:\Users\Adriana\Desktop\Altele\WhatsApp Video 2025-03-31 at 12.10.50_af799974.mp4")  # Replace with your video file path
+    videoplayer.pack(expand=True, fill="both")
+    videoplayer.play()
 
-    # Undo button
-    undo_button = tk.Button(bg_image, text="Undo", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=show_grid)
-    undo_button.place(relx=0.1, rely=0.1, anchor=tk.CENTER)
-
-    # Settings button
-    settings_button = tk.Button(bg_image, text="Settings", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=open_settings_window)
-    settings_button.place(relx=0.9, rely=0.1, anchor=tk.CENTER)
+    # Schedule transition to grid after video ends
+    videoplayer.bind("<<Ended>>", lambda e: show_grid())
 
 def show_grid():
     global user_input  # Reference the global username variable
@@ -82,19 +58,71 @@ def show_grid():
     submit = tk.Button(container, text='Submit', font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=submit_username)
     submit.grid(row=4, column=0, columnspan=2, padx=10, pady=20, sticky="ew")
 
+def on_submit():
+    for widget in root.winfo_children():
+        widget.destroy()
+    bg_image = tk.Label(root, image=grid_image_path)
+    bg_image.place(relheight=1, relwidth=1)
+    
+    # Frame for coding options
+    options_frame = tk.Frame(bg_image, bg='#711adf')
+    options_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+    options_label = tk.Label(options_frame, text="Learn to code in...", font=('Gill Sans Ultra Bold', 24), fg='#1b219d', bg='#711adf')
+    options_label.pack(pady=20)
+    
+    # Stickers for buttons
+    cplusplus_sticker = PhotoImage(file=r"C:\Users\Adriana\Desktop\Altele\ISO_C++_Logo.svg.png")  # Replace with your sticker file path
+    python_sticker = PhotoImage(file=r"C:\Users\Adriana\Desktop\Altele\Python.svg.png")        # Replace with your sticker file path
+    javascript_sticker = PhotoImage(file=r"C:\Users\Adriana\Desktop\Altele\1698604163003.png")# Replace with your sticker file path
+
+    # Options with stickers
+    options = [
+        ("C++", cplusplus_sticker),
+        ("Python", python_sticker),
+        ("JavaScript", javascript_sticker),
+    ]
+
+    button_width = 250
+    button_height = 50
+
+    for option, sticker in options:
+        option_button = tk.Button(
+            options_frame,
+            text=option,
+            font=('Gill Sans Ultra Bold', 14),
+            fg='white',
+            bg='#180451',
+            image=sticker,  # Add the sticker
+            compound=tk.LEFT,  # Place the sticker on the left side of the button text
+            command=lambda opt=option: navigate_to_page(opt),
+            width=button_width,
+            height=button_height
+        )
+        option_button.image = sticker  # Keep a reference to prevent garbage collection
+        option_button.pack(pady=10)
+
+    # Undo button
+    undo_button = tk.Button(bg_image, text="Undo", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=show_grid)
+    undo_button.place(relx=0.1, rely=0.1, anchor=tk.CENTER)
+
+    # Settings button
+    settings_button = tk.Button(bg_image, text="Settings", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=open_settings_window)
+    settings_button.place(relx=0.9, rely=0.1, anchor=tk.CENTER)
+
+
 def navigate_to_page(option):
     for widget in root.winfo_children():
         widget.destroy()
 
     # Background for planet buttons
-    last_page_image = PhotoImage(file=r"C:\Users\Adriana\Desktop\Altele\Captură de ecran din 2025-03-14 la 16.12.48.png")  # Background image
+    last_page_image = PhotoImage(file=r"C:\Users\Adriana\Desktop\Altele\Captură de ecran din 2025-03-14 la 16.12.48.png")  # Replace with your background image path
     last_page_bg = tk.Label(root, image=last_page_image)
     last_page_bg.image = last_page_image  # Keep a reference to prevent garbage collection
     last_page_bg.place(relheight=1, relwidth=1)
 
     # Example planet images
     planet_images = {
-        "Planet A": PhotoImage(file=r"C:\Users\Adriana\AppData\Local\Temp\59262d90-f7f9-497f-aba0-99d48a24949f_iloveimg-converted.zip.49f\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.4.png"),
+        "Planet A": PhotoImage(file=r"C:\Users\Adriana\AppData\Local\Temp\59262d90-f7f9-497f-aba0-99d48a24949f_iloveimg-converted.zip.49f\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.4.png"),  # Replace paths
         "Planet B": PhotoImage(file=r"C:\Users\Adriana\AppData\Local\Temp\efb8956f-63b9-4f0e-9ef5-1d2978907fe6_iloveimg-converted.zip.fe6\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.3.png"),
         "Planet C": PhotoImage(file=r"C:\Users\Adriana\AppData\Local\Temp\4f0731ba-0f37-4557-b400-700d89710775_iloveimg-converted.zip.775\WhatsApp Image 2025-03-15 at 22.57.57_426e474f1.2.png"),
     }
@@ -136,18 +164,11 @@ def open_settings_window():
     close_button = tk.Button(settings_window, text="Close", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=settings_window.destroy)
     close_button.pack(pady=20)
 
-def initial_image():
-    bg_image = tk.Label(root, image=image_path)
-    bg_image.place(relheight=1, relwidth=1)
-
 root = tk.Tk()
 root.geometry('900x600')  # Adjust for practical size
 root.title('Welcome to app!')
 
-grid_image_path = PhotoImage(file=r"C:\Users\Adriana\Desktop\Altele\Captură de ecran din 2025-03-14 la 16.12.48.png")
-image_path = PhotoImage(file=r"C:\Users\Adriana\Downloads\WhatsApp Image 2025-03-15 at 18.33.30_eeff6e0f.png")
+grid_image_path = PhotoImage(file=r"C:\Users\Adriana\Desktop\Altele\Captură de ecran din 2025-03-14 la 16.12.48.png")  # Replace with your grid background path
+play_video()
 
-initial_image()
-
-root.after(3000, show_grid)
 root.mainloop()
