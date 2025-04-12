@@ -3,6 +3,9 @@ from tkinter import PhotoImage
 from tkVideoPlayer import TkinterVideo  # Ensure this library is installed
 from tkinter import Canvas
 from tkinter import messagebox  # Import pentru popup-uri
+from tkinter import filedialog
+from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageDraw
 # Define a global variable to store the username
 user_input = ""
 
@@ -52,18 +55,27 @@ def show_grid():
     user_label = tk.Label(container, text='Username', font=('Gill Sans Ultra Bold', 15), fg='#1b219d', bg='#711adf')
     user_label.grid(row=2, column=0, padx=5, pady=5, sticky="e")
 
-    username = tk.Entry(container, font=('Stencil', 15), fg='white', bg='#180451')
+    username = tk.Entry(container, font=('Arial', 15), fg='white', bg='#180451')
     username.grid(row=2, column=1, padx=5, pady=5, sticky="w")
 
+    user_email = tk.Label(container, text='Your e-mail', font=('Gill Sans Ultra Bold', 15), fg='#1b219d', bg='#711adf')
+    user_email.grid(row=3, column=0, padx=5, pady=5, sticky="e")
+
+    your_email = tk.Entry(container, font=('Arial', 15), fg='white', bg='#180451')
+    your_email.grid(row=3, column=1, padx=5, pady=5, sticky="w")
+
     user_password = tk.Label(container, text='Password', font=('Gill Sans Ultra Bold', 15), fg='#1b219d', bg='#711adf')
-    user_password.grid(row=3, column=0, padx=5, pady=5, sticky="e")
+    user_password.grid(row=4, column=0, padx=5, pady=5, sticky="e")
 
-    password = tk.Entry(container, font=('Stencil', 15), fg='white', bg='#180451', show='*')
-    password.grid(row=3, column=1, padx=5, pady=5, sticky="w")
+    password = tk.Entry(container, font=('Arial', 15), fg='white', bg='#180451', show='*')
+    password.grid(row=4, column=1, padx=5, pady=5, sticky="w")
 
+   
     def submit_username():
         global user_input
+        global user_mail
         user_input = username.get()
+        user_mail = your_email.get()
         on_submit()
     entered_username = username.get()
     entered_password = password.get()
@@ -75,10 +87,11 @@ def show_grid():
     else:
         # Dacă autentificarea este validă, permite accesul
         user_input = entered_username
-        on_submit()  # Continuă jocul
-
+        on_submit() 
+     # Continuă jocul
+    
     submit = tk.Button(container, text='Submit', font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=submit_username)
-    submit.grid(row=4, column=0, columnspan=2, padx=10, pady=20, sticky="ew")
+    submit.grid(row=5, column=0, columnspan=2, padx=10, pady=20, sticky="ew")
 
 
 
@@ -159,6 +172,18 @@ def navigate_to_page(option):
     # Loop the video after it ends
     videoplayer.bind("<<Ended>>", lambda e: videoplayer.play())
 
+    top_bar = tk.Frame(root, bg='#711adf', height=50)
+    top_bar.pack(side=tk.TOP, fill=tk.X)
+
+    # Add three buttons to the top bar
+    button1 = tk.Button(top_bar, text="Progress", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=lambda: print("Button 1 pressed"))
+    button1.pack(side=tk.LEFT, padx=10, pady=5)
+
+    button2 = tk.Button(top_bar, text="LeaderBoard", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=lambda: print("Button 2 pressed"))
+    button2.pack(side=tk.LEFT, padx=20, pady=5)
+
+    button3 = tk.Button(top_bar, text="Profile", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=lambda: print("Button 3 pressed"))
+    button3.pack(side=tk.LEFT, padx=50, pady=5)
     # Example planet images
     planet_images = {
         "Planet A": PhotoImage(file=r"C:\Users\Adriana\AppData\Local\Temp\59262d90-f7f9-497f-aba0-99d48a24949f_iloveimg-converted.zip.49f\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.4.png"),  # Replace paths
@@ -236,9 +261,40 @@ def show_new_options_page(planet_name):
         command=on_submit
     )
     back_button.place(relx=0.1, rely=0.1, anchor=tk.CENTER)
+def choose_profile_picture():
+    global profile_label  # Referim profile_label
+    # Permite utilizatorului să selecteze un fișier imagine
+    file_path = filedialog.askopenfilename(title="Choose a Profile Picture", filetypes=[("Image Files", "*.png;*.jpg;*.jpeg")])
+
+    if file_path:
+        try:
+            # Încarcă imaginea selectată
+            profile_picture = Image.open(file_path).convert("RGBA")  # Convertim în format RGBA
+            
+            # Creăm o mască circulară
+            mask = Image.new("L", profile_picture.size, 0)
+            draw = ImageDraw.Draw(mask)
+            draw.ellipse((0, 0, profile_picture.size[0], profile_picture.size[1]), fill=255)
+            
+            # Aplicăm masca circulară
+            circular_profile = Image.new("RGBA", profile_picture.size)
+            circular_profile.paste(profile_picture, (0, 0), mask)
+            
+            # Redimensionăm imaginea rotundă
+            circular_profile = circular_profile.resize((100, 100))  # Redimensionare (opțional)
+            profile_picture_tk = ImageTk.PhotoImage(circular_profile)
+
+            # Afișează imaginea rotundă în fereastra de "Settings"
+            profile_label.config(image=profile_picture_tk)
+            profile_label.image = profile_picture_tk  # Salvează referința pentru a evita garbage collection
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load image: {e}")
+
 
 def open_settings_window():
     global user_input  # Reference the username variable
+    global user_mail
+    global profile_label
 
     # Create a new top-level window for settings
     settings_window = tk.Toplevel(root)
@@ -250,17 +306,28 @@ def open_settings_window():
     label = tk.Label(settings_window, text="Settings", font=('Gill Sans Ultra Bold', 20), fg='#1b219d', bg='#711adf')
     label.pack(pady=20)
 
-    # Display username
+    # Display username and email
     username_label = tk.Label(settings_window, text=f"Username: {user_input}", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#711adf')
     username_label.pack(pady=10)
-    saturn_label = tk.Label(settings_window, text="Saturn:basic skills in the selected language", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#711adf')
-    saturn_label.pack(pady=30)
-    venus_label = tk.Label(settings_window, text="Venus:intermediate skills in the selected language", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#711adf')
-    venus_label.pack(pady=40)
-    uranus_label = tk.Label(settings_window, text="Uranus:advanced skills in the selected language", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#711adf')
-    uranus_label.pack(pady=50)
-    close_button = tk.Button(settings_window, text="Close", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=settings_window.destroy)
-    close_button.pack(pady=60)
+    email_label = tk.Label(settings_window, text=f"E-mail: {user_mail}", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#711adf')
+    email_label.pack(pady=30)
+    
+    # Profile picture label
+    profile_label = tk.Label(settings_window, bg='#711adf', text="No profile picture selected")
+    profile_label.pack(pady=20)
+    
+    # Button to choose profile picture
+    choose_picture_button = tk.Button(
+        settings_window,
+        text="Choose Profile Picture",
+        font=('Gill Sans Ultra Bold', 15),
+        fg='white',
+        bg='#180451',
+        command=choose_profile_picture
+    )
+    choose_picture_button.pack(pady=20)
+    policy_button = tk.Button(settings_window, text="Privacy Policy", font=('Gill Sans Ultra Bold'),fg='white',bg='#180451')
+    policy_button.pack(pady=50)
 
 root = tk.Tk()
 root.geometry('900x600')  # Adjust for practical size
