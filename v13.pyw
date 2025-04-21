@@ -17,7 +17,7 @@ def play_video():
     videoplayer = TkinterVideo(master=root, scaled=True)
     videoplayer.load(r"C:\Users\Adriana\Desktop\Altele\WhatsApp Video 2025-03-31 at 12.10.50_af799974.mp4") 
     videoplayer.pack()
-    videoplayer.place(relx=0.5, rely=0.5, anchor="center", width=1550, height=790)  # Exemplu pentru 400x300 # Replace with your video file path
+    videoplayer.place(relx=0.5, rely=0.5, anchor="center", width=1550, height=791)  # Exemplu pentru 400x300 # Replace with your video file path
     videoplayer.play()
 
     # Schedule transition to grid after video ends
@@ -25,7 +25,7 @@ def play_video():
 
 def show_grid():
     global user_input
-
+    global username, password, your_email
     for widget in root.winfo_children():
         widget.destroy()
 
@@ -69,29 +69,28 @@ def show_grid():
 
     password = tk.Entry(container, font=('Arial', 15), fg='white', bg='#180451', show='*')
     password.grid(row=4, column=1, padx=5, pady=5, sticky="w")
-
-   
-    def submit_username():
-        global user_input
-        global user_mail
-        user_input = username.get()
-        user_mail = your_email.get()
-        on_submit()
-    entered_username = username.get()
-    entered_password = password.get()
-
-    # Verifică dacă câmpurile sunt completate
-    if not entered_username or not entered_password:
-        # Popup cu mesaj de eroare
-        messagebox.showerror("Eroare de Autentificare", "Autentifică-te!")
-    else:
-        # Dacă autentificarea este validă, permite accesul
-        user_input = entered_username
-        on_submit() 
-     # Continuă jocul
     
     submit = tk.Button(container, text='Submit', font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=submit_username)
     submit.grid(row=5, column=0, columnspan=2, padx=10, pady=20, sticky="ew")
+   
+def submit_username():
+    entered_username = username.get()
+    entered_password = password.get()
+    entered_email = your_email.get()
+
+    # Verify if all fields are completed
+    if not entered_username or not entered_password or not entered_email:
+        # Show an error popup with the message
+        messagebox.showerror("Eroare de Autentificare", "Autentifică-te!")
+    else:
+        # If all fields are valid, proceed
+        global user_input
+        global user_mail
+        user_input = entered_username
+        user_mail = entered_email
+        on_submit()
+
+     # Continuă jocul
 
 
 
