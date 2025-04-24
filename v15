@@ -6,30 +6,13 @@ from tkinter import messagebox  # Import pentru popup-uri
 from tkinter import filedialog
 from PIL import Image, ImageTk
 from PIL import Image, ImageTk, ImageDraw
-import os
-import sys
 # Define a global variable to store the username
 user_input = ""
-def get_asset_path(filename):
-    """
-    Returns the path of a file, whether the script is run normally or packaged with PyInstaller.
-    """
-    if hasattr(sys, "_MEIPASS"):
-        # PyInstaller's temp directory
-        return os.path.join(sys._MEIPASS, filename)
-    return filename
 
 def play_video():
     for widget in root.winfo_children():
         widget.destroy()
-    default_video_path = get_asset_path(r"C:\Users\Adriana\Desktop\Altele\WhatsApp Video 2025-03-31 at 12.10.50_af799974.mp4")  # Place the default video file in the same directory
-    if not os.path.exists(default_video_path):
-        messagebox.showerror("Error", "Default video file not found! Please select a file.")
-        file_path = filedialog.askopenfilename(filetypes=[("Video Files", "*.mp4")])
-        if file_path:
-            default_video_path = file_path
-        else:
-            return
+
     # Create video player
     videoplayer = TkinterVideo(master=root, scaled=True)
     videoplayer.load(r"C:\Users\Adriana\Desktop\Altele\WhatsApp Video 2025-03-31 at 12.10.50_af799974.mp4") 
@@ -43,14 +26,6 @@ def play_video():
 def show_grid():
     global user_input
     global username, password, your_email
-    background_video_path =get_asset_path(r"C:\Users\Adriana\Desktop\Altele\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4")  # Default video file for background
-    if not os.path.exists(background_video_path):
-        messagebox.showerror("Error", "Background video file not found! Please select a file.")
-        file_path = filedialog.askopenfilename(filetypes=[("Video Files", "*.mp4")])
-        if file_path:
-            background_video_path = file_path
-        else:
-            return
     for widget in root.winfo_children():
         widget.destroy()
 
@@ -124,16 +99,7 @@ def on_submit():
         widget.destroy()
     canvas = Canvas(root)
     canvas.place(relwidth=1, relheight=1)
-    
-    default_video_path = get_asset_path(r"C:\Users\Adriana\Desktop\Altele\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4")
-    if not os.path.exists(default_video_path):
-        # Prompt the user to select a file if missing
-        messagebox.showerror("Error", "Background video file not found! Please select a file.")
-        file_path = filedialog.askopenfilename(filetypes=[("Video Files", "*.mp4")])
-        if file_path:
-            default_video_path = file_path
-        else:
-            return
+
     # Load and play video as background
     videoplayer = TkinterVideo(master=canvas, scaled=True)
     videoplayer.load(r"C:\Users\Adriana\Desktop\Altele\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4")  # Replace with your video file path
@@ -162,7 +128,7 @@ def on_submit():
 
     button_width = 250
     button_height = 50
-    
+
     for option, sticker in options:
         option_button = tk.Button(
             options_frame,
@@ -191,14 +157,7 @@ def on_submit():
 def navigate_to_page(option):
     for widget in root.winfo_children():
         widget.destroy()
-    background_video_path = get_asset_path(r"C:\Users\Adriana\Desktop\Altele\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4")
-    if not os.path.exists(background_video_path):
-        messagebox.showerror("Error", "Background video file not found! Please select a file.")
-        file_path = filedialog.askopenfilename(filetypes=[("Video Files", "*.mp4")])
-        if file_path:
-            background_video_path = file_path
-        else:
-            return
+
     # Background for planet buttons
     canvas = Canvas(root)
     canvas.place(relwidth=1, relheight=1)
@@ -227,8 +186,9 @@ def navigate_to_page(option):
     # Example planet images
     planet_images = {
         "Planet A": PhotoImage(file=r"C:\Users\Adriana\AppData\Local\Temp\59262d90-f7f9-497f-aba0-99d48a24949f_iloveimg-converted.zip.49f\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.4.png"),  # Replace paths
-        "Planet B": PhotoImage(file=r"C:\Users\Adriana\Desktop\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.3.png"),
-        "Planet C": PhotoImage(file=r"C:\Users\Adriana\Desktop\WhatsApp Image 2025-03-15 at 22.57.57_426e474f1.2.png"),}
+        "Planet B": PhotoImage(file=r"C:\Users\Adriana\AppData\Local\Temp\efb8956f-63b9-4f0e-9ef5-1d2978907fe6_iloveimg-converted.zip.fe6\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.3.png"),
+        "Planet C": PhotoImage(file=r"C:\Users\Adriana\AppData\Local\Temp\4f0731ba-0f37-4557-b400-700d89710775_iloveimg-converted.zip.775\WhatsApp Image 2025-03-15 at 22.57.57_426e474f1.2.png"),
+    }
 
     # Add planet buttons directly on the background image
     column = 0
