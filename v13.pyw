@@ -8,6 +8,7 @@ from PIL import Image, ImageTk
 from PIL import Image, ImageTk, ImageDraw
 import os
 import sys
+import json  
 # Define a global variable to store the username
 user_input = ""
 def get_asset_path(filename):
@@ -222,13 +223,13 @@ def navigate_to_page(option):
     button2 = tk.Button(top_bar, text="LeaderBoard", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=lambda: print("Button 2 pressed"))
     button2.pack(side=tk.LEFT, padx=20, pady=5)
 
-    button3 = tk.Button(top_bar, text="Profile", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=lambda: print("Button 3 pressed"))
+    button3 = tk.Button(top_bar, text="Profile", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=open_profile_window)
     button3.pack(side=tk.LEFT, padx=50, pady=5)
     # Example planet images
     planet_images = {
-        "Planet A": PhotoImage(file=r"C:\Users\Adriana\AppData\Local\Temp\59262d90-f7f9-497f-aba0-99d48a24949f_iloveimg-converted.zip.49f\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.4.png"),  # Replace paths
-        "Planet B": PhotoImage(file=r"C:\Users\Adriana\Desktop\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.3.png"),
-        "Planet C": PhotoImage(file=r"C:\Users\Adriana\Desktop\WhatsApp Image 2025-03-15 at 22.57.57_426e474f1.2.png"),}
+        "Planet A": PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\WhatsApp Image 2025-03-15 at 22.57.57_426e474f1.2.png"),  # Replace paths
+        "Planet B": PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.3.png"),
+        "Planet C": PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\WhatsApp Image 2025-03-15 at 22.57.57_426e474f1.2.png"),}
 
     # Add planet buttons directly on the background image
     column = 0
@@ -300,6 +301,20 @@ def show_new_options_page(planet_name):
         command=on_submit
     )
     back_button.place(relx=0.1, rely=0.1, anchor=tk.CENTER)
+
+def save_user_data(data):
+    with open("user_data.json", "w") as f:
+        json.dump(data, f)
+
+def load_user_data():
+    try:
+        with open("user_data.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+
+# Initialize user data
+user_data = load_user_data()
 def choose_profile_picture():
     global profile_label  # Referim profile_label
     # Permite utilizatorului să selecteze un fișier imagine
@@ -325,11 +340,18 @@ def choose_profile_picture():
 
             # Afișează imaginea rotundă în fereastra de "Settings"
             profile_label.config(image=profile_picture_tk)
-            profile_label.image = profile_picture_tk  # Salvează referința pentru a evita garbage collection
+            profile_label.image = profile_picture_tk
+            
+            user_data["profile_picture"] = file_path  # Save the file path
+            save_user_data(user_data)  # Salvează referința pentru a evita garbage collection
         except Exception as e:
             messagebox.showerror("Error", f"Failed to load image: {e}")
 
-
+def remove_profile_picture():
+    global profile_label
+    profile_label.config(image="", text="No profile picture selected")
+    user_data.pop("profile_picture", None)  # Remove profile picture from user data
+    save_user_data(user_data)
 def open_settings_window():
     global user_input  # Reference the username variable
     global user_mail
@@ -355,6 +377,22 @@ def open_settings_window():
     profile_label = tk.Label(settings_window, bg='#711adf', text="No profile picture selected")
     profile_label.pack(pady=20)
     
+    if "profile_picture" in user_data:
+        try:
+            profile_picture = Image.open(user_data["profile_picture"]).convert("RGBA")
+            mask = Image.new("L", profile_picture.size, 0)
+            draw = ImageDraw.Draw(mask)
+            draw.ellipse((0, 0, profile_picture.size[0], profile_picture.size[1]), fill=255)
+            circular_profile = Image.new("RGBA", profile_picture.size)
+            circular_profile.paste(profile_picture, (0, 0), mask)
+            circular_profile = circular_profile.resize((100, 100))
+            profile_picture_tk = ImageTk.PhotoImage(circular_profile)
+
+            # Display profile picture
+            profile_label.config(image=profile_picture_tk, text="")
+            profile_label.image = profile_picture_tk
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load saved image: {e}")
     # Button to choose profile picture
     choose_picture_button = tk.Button(
         settings_window,
@@ -365,14 +403,83 @@ def open_settings_window():
         command=choose_profile_picture
     )
     choose_picture_button.pack(pady=20)
-    policy_button = tk.Button(settings_window, text="Privacy Policy", font=('Gill Sans Ultra Bold'),fg='white',bg='#180451')
-    policy_button.pack(pady=50)
+
+    remove_picture_button = tk.Button(
+        settings_window,
+        text="Remove Profile Picture",
+        font=('Gill Sans Ultra Bold', 15),
+        fg='white',
+        bg='#180451',
+        command=remove_profile_picture
+    )
+    remove_picture_button.pack(pady=20)
 
 root = tk.Tk()
 root.geometry('900x600')  # Adjust for practical size
 root.title('Welcome to app!')
 
-grid_image_path = PhotoImage(file=r"C:\Users\Adriana\Desktop\Altele\WhatsApp Image 2025-04-05 at 22.02.28_9d96eb52.png")  # Replace with your grid background path
+settings_button = tk.Button(
+    root,
+    text="Settings",
+    font=('Gill Sans Ultra Bold', 15),
+    fg='white',
+    bg='#180451',
+    command=open_settings_window
+)
+settings_button.pack(pady=20)
+def open_profile_window():
+    global profile_label  # Referim profile_label
+
+    # Creare fereastră nouă pentru profil
+    profile_window = tk.Toplevel(root)
+    profile_window.geometry('300x400')  # Dimensiuni ajustate
+    profile_window.title("Profile")
+    profile_window.configure(bg='#711adf')  # Culoare de fundal
+
+    # Adăugare etichetă pentru titlu
+    title_label = tk.Label(profile_window, text="Profile", font=('Gill Sans Ultra Bold', 20), fg='#1b219d', bg='#711adf')
+    title_label.pack(pady=20)
+
+    # Afișare poza de profil
+    profile_display_label = tk.Label(profile_window, bg='#711adf', text="No profile picture selected")
+    profile_display_label.pack(pady=20)
+
+    if "profile_picture" in user_data:
+        try:
+            # Încărcare poza de profil salvată
+            profile_picture = Image.open(user_data["profile_picture"]).convert("RGBA")
+            mask = Image.new("L", profile_picture.size, 0)
+            draw = ImageDraw.Draw(mask)
+            draw.ellipse((0, 0, profile_picture.size[0], profile_picture.size[1]), fill=255)
+            circular_profile = Image.new("RGBA", profile_picture.size)
+            circular_profile.paste(profile_picture, (0, 0), mask)
+            circular_profile = circular_profile.resize((100, 100))  # Redimensionare
+            profile_picture_tk = ImageTk.PhotoImage(circular_profile)
+
+            # Afișare poza de profil în fereastră
+            profile_display_label.config(image=profile_picture_tk, text="")
+            profile_display_label.image = profile_picture_tk  # Păstrare referință pentru a evita garbage collection
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load saved image: {e}")
+
+    # Afișare username și e-mail
+    username_label = tk.Label(profile_window, text=f"Username: {user_input}", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#711adf')
+    username_label.pack(pady=10)
+    email_label = tk.Label(profile_window, text=f"E-mail: {user_mail}", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#711adf')
+    email_label.pack(pady=10)
+
+# Adaugă butonul "Profile" în fereastra principală
+button_profile = tk.Button(
+    root,
+    text="Profile",
+    font=('Gill Sans Ultra Bold', 12),
+    fg='white',
+    bg='#180451',
+    command=open_profile_window
+)
+button_profile.pack(side=tk.LEFT, padx=50, pady=5)
+
+grid_image_path = PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\WhatsApp Image 2025-04-05 at 22.02.28_9d96eb52.png")  # Replace with your grid background path
 play_video()
 
 root.mainloop()
