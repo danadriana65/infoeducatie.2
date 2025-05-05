@@ -229,7 +229,7 @@ def navigate_to_page(option):
     planet_images = {
         "Planet A": PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\WhatsApp Image 2025-03-15 at 22.57.57_426e474f1.2.png"),  # Replace paths
         "Planet B": PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.3.png"),
-        "Planet C": PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\WhatsApp Image 2025-03-15 at 22.57.57_426e474f1.2.png"),}
+        "Planet C": PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.4.png"),}
 
     # Add planet buttons directly on the background image
     column = 0
