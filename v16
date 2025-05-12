@@ -150,9 +150,9 @@ def on_submit():
     options_label.pack(pady=20)
     
     # Stickers for buttons
-    cplusplus_sticker = PhotoImage(file=r"C:\Users\Adriana\Desktop\Altele\ISO_C++_Logo.svg.png")  # Replace with your sticker file path
-    python_sticker = PhotoImage(file=r"C:\Users\Adriana\Desktop\Altele\Python.svg.png")        # Replace with your sticker file path
-    javascript_sticker = PhotoImage(file=r"C:\Users\Adriana\Desktop\Altele\1698604163003.png")# Replace with your sticker file path
+    cplusplus_sticker = PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\ISO_C++_Logo.svg(1).png")  # Replace with your sticker file path
+    python_sticker = PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\Python.svg(1).png")        # Replace with your sticker file path
+    javascript_sticker = PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\1698604163003(1).png")# Replace with your sticker file path
 
     # Options with stickers
     options = [
