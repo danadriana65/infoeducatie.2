@@ -126,7 +126,7 @@ def on_submit():
     canvas = Canvas(root)
     canvas.place(relwidth=1, relheight=1)
     
-    default_video_path = get_asset_path(r"C:\Users\Adriana\Desktop\Altele\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4")
+    default_video_path = get_asset_path(r"C:\Users\Adriana\Desktop\grid\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4")
     if not os.path.exists(default_video_path):
         # Prompt the user to select a file if missing
         messagebox.showerror("Error", "Background video file not found! Please select a file.")
@@ -137,7 +137,7 @@ def on_submit():
             return
     # Load and play video as background
     videoplayer = TkinterVideo(master=canvas, scaled=True)
-    videoplayer.load(r"C:\Users\Adriana\Desktop\Altele\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4")  # Replace with your video file path
+    videoplayer.load(r"C:\Users\Adriana\Desktop\grid\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4")  # Replace with your video file path
     videoplayer.pack(expand=True, fill="both")
     videoplayer.play()
 
@@ -150,9 +150,9 @@ def on_submit():
     options_label.pack(pady=20)
     
     # Stickers for buttons
-    cplusplus_sticker = PhotoImage(file=r"C:\Users\Adriana\Desktop\Altele\ISO_C++_Logo.svg.png")  # Replace with your sticker file path
-    python_sticker = PhotoImage(file=r"C:\Users\Adriana\Desktop\Altele\Python.svg.png")        # Replace with your sticker file path
-    javascript_sticker = PhotoImage(file=r"C:\Users\Adriana\Desktop\Altele\1698604163003.png")# Replace with your sticker file path
+    cplusplus_sticker = PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\ISO_C++_Logo.svg(1).png")  # Replace with your sticker file path
+    python_sticker = PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\Python.svg(1).png")        # Replace with your sticker file path
+    javascript_sticker = PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\1698604163003(1).png")# Replace with your sticker file path
 
     # Options with stickers
     options = [
@@ -206,7 +206,7 @@ def navigate_to_page(option):
 
     # Load and play video as background
     videoplayer = TkinterVideo(master=canvas, scaled=True)
-    videoplayer.load(r"C:\Users\Adriana\Desktop\Altele\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4")  # Replace with your video file path
+    videoplayer.load(r"C:\Users\Adriana\Desktop\grid\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4")  # Replace with your video file path
     videoplayer.pack(expand=True, fill="both")
     videoplayer.play()
 
