@@ -286,11 +286,14 @@ def show_new_options_page(planet_name, selected_option):
 
     # Generate 10 dynamic buttons
     for i in range(7):
-        if planet_name == "Planet A" and selected_option == "Python" :
+        if planet_name == "Planet A" and selected_option == "Python":
             button_command = partial(show_question_page, questions[i], answers[i], correct_answers[i])
+        elif planet_name == "Planet B" and selected_option == "Python":
+            button_command = partial(show_question_page, questions_python_b[i], answers_python_b[i], correct_answers_python_b[i])
+        elif planet_name == "Planet C" and selected_option == "Python":
+            button_command = partial(show_question_page_with_code, questions_python_c[i], code_samples_python_c[i], answers_python_c[i], correct_answers_python_c[i])
         else:
             button_command = lambda: print(f"Exercițiu {i + 1} selectat pentru {planet_name}, dar fără întrebări.")
-
         button = tk.Button(root, text=f"Exercițiu {i + 1}", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451',
                            command=button_command)
         button.pack(pady=10)
@@ -366,8 +369,104 @@ def show_question_page(question, answer_options, correct_answer):
     back_button = tk.Button(root, text="Înapoi", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=lambda: show_new_options_page("Planeta A"))
     back_button.pack(pady=20)
 
+questions_python_b = [
+    "Cum declari o funcție în Python?",
+    "Cum citești un fișier în Python?",
+    "Cum iterăm peste o listă folosind list comprehension?",
+    "Cum creezi o clasă în Python?",
+    "Cum verifici dacă un element există într-un dicționar?",
+    "Cum folosești `try-except` pentru gestionarea erorilor?",
+    "Cum sortezi o listă în Python?"
+]
+
+answers_python_b = [
+    ["def my_function():\n    print('Hello!')", "function my_function():\n    print('Hello!')", "def myFunction() print('Hello!')", "fun my_function():\n    print('Hello!')"],
+    ["with open('file.txt', 'r') as f:\n    data = f.read()", "file = open('file.txt', 'r')\n    file.read()", "open('file.txt', 'read')", "readfile('file.txt')"],
+    ["[x**2 for x in range(10)]", "for x in range(10):\n    x**2", "[for x in range(10): x**2]", "map(lambda x: x**2, range(10))"],
+    ["class MyClass:\n    def __init__(self):\n        self.name = 'Example'", "def MyClass:\n    self.name = 'Example'", "new Class MyClass:\n    name = 'Example'", "class = MyClass()"],
+    ["if 'key' in my_dict:", "my_dict.has_key('key')", "my_dict.contains('key')", "my_dict.find('key')"],
+    ["try:\n    x = int(input('Număr:'))\nexcept ValueError:\n    print('Eroare!')", "try x = int(input('Număr')) except ValueError: print('Eroare!')", "except ValueError:\n    x = int(input('Număr'))", "catch ValueError:\n    x = int(input('Număr'))"],
+    ["sorted(my_list)", "my_list.sort()", "sort(my_list)", "my_list.sorted()"]
+]
+
+correct_answers_python_b = [
+    "def my_function():\n    print('Hello!')",
+    "with open('file.txt', 'r') as f:\n    data = f.read()",
+    "[x**2 for x in range(10)]",
+    "class MyClass:\n    def __init__(self):\n        self.name = 'Example'",
+    "if 'key' in my_dict:",
+    "try:\n    x = int(input('Număr:'))\nexcept ValueError:\n    print('Eroare!')",
+    "sorted(my_list)"
+]
 
   # Testăm în consolă dacă se transmit
+questions_python_c = [
+    "În ce linie apare eroarea de indentare?",
+    "Unde este eroarea de tip?",
+    "Pe ce linie se află eroarea de atribuție?",
+    "Unde este eroarea de import?",
+    "Pe ce linie este eroarea de index?",
+    "Unde este eroarea de sintaxă?",
+    "Pe ce linie este eroarea de acces la fișier?"
+]
+
+code_samples_python_c = [
+    "def my_function():\nprint('Hello!')\n  print('Indentation Error!')",
+    "x = 'text' + 5\nprint(x)",
+    "a, b = (1, 2, 3)\nprint(a, b)",
+    "import non_existent_module\nprint('This should fail')",
+    "my_list = [1, 2, 3]\nprint(my_list[5])",
+    "print('Hello'\nprint('World')",
+    "with open('missing_file.txt', 'r') as f:\n    data = f.read()"
+]
+
+answers_python_c = [
+    ["Linia 2", "Linia 3", "Linia 1", "Nicio eroare"],
+    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
+    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
+    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
+    ["Linia 2", "Linia 3", "Linia 1", "Nicio eroare"],
+    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
+    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"]
+]
+
+correct_answers_python_c = [
+    "Linia 2",
+    "Linia 1",
+    "Linia 1",
+    "Linia 1",
+    "Linia 2",
+    "Linia 1",
+    "Linia 1"
+]
+def show_question_page_with_code(question, code_sample, answer_options, correct_answer):
+    """Afișează codul și permite utilizatorului să aleagă unde este eroarea."""
+    for widget in root.winfo_children():
+        widget.destroy()
+    bg_image = tk.Label(root, image=grid_image_path)
+    bg_image.place(relheight=1, relwidth=1)
+
+    title_label = tk.Label(root, text=question, font=('Gill Sans Ultra Bold', 18), fg='white', bg='#711adf', wraplength=500)
+    title_label.pack(pady=20)
+
+    code_label = tk.Label(root, text=code_sample, font=('Courier', 14), fg='white', bg='#180451', justify="left")
+    code_label.pack(pady=20)
+
+    def handle_answer(selected_answer, button):
+        """Schimbă culoarea butonului în funcție de răspunsul ales."""
+        if selected_answer == correct_answer:
+            button.config(bg="green")
+        else:
+            button.config(bg="red")
+
+    for answer in answer_options:
+        btn = tk.Button(root, text=answer, font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451')
+        btn.config(command=lambda a=answer, b=btn: handle_answer(a, b))
+        btn.pack(pady=5)
+
+    back_button = tk.Button(root, text="Înapoi", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=lambda: show_new_options_page("Planet C", "Python"))
+    back_button.pack(pady=20)
+
 
 def choose_profile_picture():
     global profile_label  # Referim profile_label
