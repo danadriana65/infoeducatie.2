@@ -292,6 +292,12 @@ def show_new_options_page(planet_name, selected_option):
             button_command = partial(show_question_page, questions_python_b[i], answers_python_b[i], correct_answers_python_b[i])
         elif planet_name == "Planet C" and selected_option == "Python":
             button_command = partial(show_question_page_with_code, questions_python_c[i], code_samples_python_c[i], answers_python_c[i], correct_answers_python_c[i])
+        elif planet_name == "Planet A" and selected_option == "JavaScript":
+            button_command = partial(show_question_page, questions_javascript_a[i], answers_javascript_a[i], correct_answers_javascript_a[i])
+        elif planet_name == "Planet B" and selected_option == "JavaScript":
+            button_command = partial(show_question_page, questions_javascript_code[i], answers_javascript_code[i], correct_answers_javascript_code[i])
+        elif planet_name == "Planet C" and selected_option == "JavaScript":
+            button_command = partial(show_question_page_with_code, questions_python_c[i], code_samples_python_c[i], answers_python_c[i], correct_answers_python_c[i])
         else:
             button_command = lambda: print(f"Exercițiu {i + 1} selectat pentru {planet_name}, dar fără întrebări.")
         button = tk.Button(root, text=f"Exercițiu {i + 1}", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451',
@@ -343,6 +349,104 @@ answers = [
 ]
 
 correct_answers = ["Jupiter", "8", "Neil Armstrong", "Marte", "Soarele", "Saturn", "Venus"]
+questions_javascript_a = [
+    "Cum declarăm o variabilă în JavaScript?",
+    "Care dintre următoarele NU este un mod valid de a declara o funcție?",
+    "Cum verificăm tipul unei variabile în JavaScript?",
+    "Ce va afișa `console.log(2 + '2')`?",
+    "Care dintre următoarele structuri de date NU există în JavaScript?",
+    "Cum iterăm peste un array folosind `map()`?",
+    "Cum facem o copie superficială a unui obiect în JavaScript?"
+]
+
+answers_javascript_a = [
+    ["var x = 10;", "let x = 10;", "const x = 10;", "int x = 10;"],
+    ["function myFunc() {}", "const myFunc = function() {}", "myFunc = () => {}", "def myFunc() {}"],
+    ["typeof x", "x.type()", "getType(x)", "x.kind"],
+    ["22", "'22'", "4", "Error"],
+    ["Array", "Set", "Tuple", "Map"],
+    ["array.map(x => x * 2)", "map(array, x => x * 2)", "array.map(function(x) { return x * 2 })", "array.forEach(x => x * 2)"],
+    ["Object.assign({}, obj)", "obj.copy()", "{...obj}", "clone(obj)"]
+]
+
+correct_answers_javascript_a = [
+    "int x = 10;",  # Varianta greșită (to test knowledge)
+    "def myFunc() {}",  # Varianta greșită (nu există în JS)
+    "typeof x",
+    "'22'",
+    "Tuple",
+    "array.map(x => x * 2)",
+    "{...obj}"
+]
+questions_javascript_code = [
+    "Cum declarăm o funcție anonimă în JavaScript?",
+    "Care este sintaxa corectă pentru Arrow Function?",
+    "Cum definim un obiect JavaScript?",
+    "Care este modul corect de a itera printr-o listă cu `forEach`?",
+    "Cum verificăm dacă un element există într-un array?",
+    "Cum facem destructurarea unui obiect?",
+    "Cum adăugăm un nou element într-un array?"
+]
+
+answers_javascript_code = [
+    ["let func = function() {}", "let func() {}", "function = func() {}"],
+    ["const add = (a, b) => a + b;", "add = (a, b) { return a + b; }", "function add(a, b) => a + b;"],
+    ["const obj = { name: 'Alex', age: 25 }", "object obj = { 'name': 'Alex', 'age': 25 }", "let obj = object { name: 'Alex', age: 25 };"],
+    ["array.forEach(item => console.log(item));", "for (item in array) { console.log(item); }", "array.each(item => console.log(item));"],
+    ["array.includes(5)", "array.has(5)", "array.exists(5)"],
+    ["const { name, age } = obj;", "destructure(obj).get('name', 'age');", "let name, age = obj.extract();"],
+    ["array.push('newItem')", "array.add('newItem')", "array.insert('newItem')"]
+]
+
+correct_answers_javascript_code = [
+    "let func = function() {}",
+    "const add = (a, b) => a + b;",
+    "const obj = { name: 'Alex', age: 25 }",
+    "array.forEach(item => console.log(item));",
+    "array.includes(5)",
+    "const { name, age } = obj;",
+    "array.push('newItem')"
+]
+questions_javascript_error = [
+    "Unde este eroarea de sintaxă?",
+    "În ce linie apare eroarea de tip?",
+    "Unde se află eroarea de referință?",
+    "Pe ce linie se află eroarea de index?",
+    "Unde apare eroarea de funcție nedefinită?",
+    "Pe ce linie este eroarea de acces la obiect?",
+    "În ce linie este eroarea de scoping?"
+]
+
+code_samples_javascript_error = [
+    "console.log('Hello World'\nconsole.log('JS Error')",   # Lipsă paranteză închidere
+    "let x = 'text' + 5;\nconsole.log(x);",                # Concatenare greșită
+    "console.log(y);\nlet y = 10;",                         # Variabilă folosită înainte de declarare
+    "let array = [1, 2, 3];\nconsole.log(array[5]);",       # Acces invalid la index
+    "myFunction();\nfunction notDeclared() { console.log('Error') }",  # Apelare înainte de definire
+    "let obj = { name: 'Alice' };\nconsole.log(obj.age.length);",      # Acces invalid la proprietăți
+    "function test() {\n    let x = 10;\n}\nconsole.log(x);"  # Variabilă în afara scoping-ului funcției
+]
+
+answers_javascript_error = [
+    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
+    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
+    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
+    ["Linia 2", "Linia 3", "Linia 1", "Nicio eroare"],
+    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
+    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
+    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"]
+]
+
+correct_answers_javascript_error = [
+    "Linia 1",
+    "Linia 1",
+    "Linia 1",
+    "Linia 2",
+    "Linia 1",
+    "Linia 2",
+    "Linia 3"
+]
+
 
 def show_question_page(question, answer_options, correct_answer):
     for widget in root.winfo_children():
