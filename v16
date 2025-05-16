@@ -305,6 +305,8 @@ def show_new_options_page(planet_name, selected_option):
             button_command = partial(show_question_page, planet_name, selected_option, questions_cpp[i], answers_cpp[i], correct_answers_cpp[i])
         elif planet_name == "Planet B" and selected_option == "C++":
             button_command = partial(show_question_page, planet_name, selected_option, questions_cpp_code[i], answers_cpp_code[i], correct_answers_cpp_code[i])
+        elif planet_name == "Planet C" and selected_option == "C++":
+            button_command = partial(show_question_page_with_code, planet_name, selected_option, questions_cpp1[i], code_cpp1[i], answers_cpp1[i],correct_answers_cpp1[i])
         else:
             button_command = lambda: print(f"Exercițiu {i + 1} selectat pentru {planet_name}, dar fără întrebări.")
         button = tk.Button(buttons_frame, text=f"Exercițiu {i + 1}", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=button_command)
@@ -335,6 +337,45 @@ def load_user_data():
 
 # Initialize user data
 user_data = load_user_data()
+questions_cpp1 = [
+    "Care dintre următoarele declară corect o funcție în Python?",
+    "Care dintre următoarele este sintaxa corectă pentru un `for loop`?",
+    "Care este modul corect de a accesa un element dintr-o listă?",
+    "Care dintre următoarele alocă corect memorie dinamică?",
+    "Care dintre următoarele clase implementează corect moștenirea?",
+    "Care este forma corectă de a citi un număr de la tastatură?",
+    "Care dintre următoarele definește corect un destructor?"
+]
+
+# Vectorul de cod Python asociat fiecărei întrebări
+code_cpp1 = [
+    "def my_function():\n    pass",
+    "for i in range(n):\n    print(i)",
+    "my_list = [1, 2, 3]\nprint(my_list[2])",
+    "import numpy as np\narr = np.zeros(5)",
+    "class Child(Parent):\n    pass",
+    "x = int(input(\"Introdu un număr: \"))",
+    "class MyClass:\n    def __del__(self):\n        print(\"Destructor apelat\")"
+]
+answers_cpp1 = [
+    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
+    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
+    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
+    ["Linia 2", "Linia 3", "Linia 1", "Nicio eroare"],
+    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
+    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
+    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"]
+]
+
+correct_answers_cpp1 = [
+    "Linia 1",
+    "Linia 1",
+    "Linia 1",
+    "Linia 2",
+    "Linia 1",
+    "Linia 2",
+    "Linia 3"
+]
 questions_cpp_code = [
     "Care dintre următoarele declară corect o funcție în C++?",
     "Care dintre următoarele este sintaxa corectă pentru un `for loop`?",
