@@ -105,6 +105,39 @@ def show_grid():
     
     submit = tk.Button(container, text='Submit', font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=submit_username)
     submit.grid(row=5, column=0, columnspan=2, padx=10, pady=20, sticky="ew")
+    sign_out_button = tk.Button(
+    root,
+    text="Sign Out",
+    font=('Gill Sans Ultra Bold', 12),
+    fg='white',
+    bg='#180451',
+    command=sign_out
+)
+    sign_out_button.pack(side=tk.BOTTOM, padx=10, pady=5)
+
+# Funcție pentru salvarea datelor utilizatorului în JSON
+
+def sign_out():
+    global user_input, user_mail
+    user_input = ""
+    user_mail = ""
+
+    # Ștergem utilizatorul curent din JSON
+    user_data = load_user_data()
+    if user_input in user_data:
+        del user_data[user_input]  # Eliminăm doar utilizatorul curent
+
+        # Salvăm datele actualizate
+        with open("user_date.json", "w") as f:
+            json.dump(user_data, f, indent=4)
+
+    # Resetăm câmpurile de autentificare
+    username.delete(0, tk.END)
+    your_email.delete(0, tk.END)
+    password.delete(0, tk.END)
+
+    # Reîncărcăm pagina de login
+    show_grid()
 
 def save_user_data(username, email, password):
     # Hash-uim parola înainte de salvare
@@ -156,6 +189,8 @@ def submit_username():
 
         user_input = entered_username
         user_mail = entered_email
+
+
      # Continuă jocul
 
 def on_submit():
@@ -265,9 +300,9 @@ def navigate_to_page(option):
     button3.pack(side=tk.LEFT, padx=50, pady=5)
     # Example planet images
     planet_images = {
-        "Planet A": PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\WhatsApp Image 2025-03-15 at 22.57.57_426e474f1.2.png"),  # Replace paths
-        "Planet B": PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.3.png"),
-        "Planet C": PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.4.png"),}
+        "Uranus": PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\WhatsApp Image 2025-03-15 at 22.57.57_426e474f1.2.png"),  # Replace paths
+        "Venus": PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.3.png"),
+        "Saturn": PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.4.png"),}
 
     # Add planet buttons directly on the background image
     column = 0
@@ -326,23 +361,23 @@ def show_new_options_page(planet_name, selected_option):
     buttons_frame.pack(pady=70)
     # Generate 7 dynamic buttons
     for i in range(7):
-        if planet_name == "Planet A" and selected_option == "Python":
+        if planet_name == "Uranus" and selected_option == "Python":
             button_command = partial(show_question_page, planet_name, selected_option, questions[i], answers[i], correct_answers[i])
-        elif planet_name == "Planet B" and selected_option == "Python":
+        elif planet_name == "Venus" and selected_option == "Python":
             button_command = partial(show_question_page, planet_name, selected_option, questions_python_b[i], answers_python_b[i], correct_answers_python_b[i])
-        elif planet_name == "Planet C" and selected_option == "Python":
+        elif planet_name == "Saturn" and selected_option == "Python":
             button_command = partial(show_question_page_with_code, planet_name, selected_option, questions_python_c[i], code_samples_python_c[i], answers_python_c[i], correct_answers_python_c[i])
-        elif planet_name == "Planet A" and selected_option == "JavaScript":
+        elif planet_name == "Uranus" and selected_option == "JavaScript":
             button_command = partial(show_question_page, planet_name, selected_option, questions_javascript_a[i], answers_javascript_a[i], correct_answers_javascript_a[i])
-        elif planet_name == "Planet B" and selected_option == "JavaScript":
+        elif planet_name == "Venus" and selected_option == "JavaScript":
             button_command = partial(show_question_page, planet_name, selected_option, questions_javascript_code[i], answers_javascript_code[i], correct_answers_javascript_code[i])
-        elif planet_name == "Planet C" and selected_option == "JavaScript":
+        elif planet_name == "Saturn" and selected_option == "JavaScript":
             button_command = partial(show_question_page_with_code, planet_name, selected_option, questions_python_c[i], code_samples_python_c[i], answers_python_c[i], correct_answers_python_c[i])
-        elif planet_name == "Planet A" and selected_option == "C++":
+        elif planet_name == "Uranus" and selected_option == "C++":
             button_command = partial(show_question_page, planet_name, selected_option, questions_cpp[i], answers_cpp[i], correct_answers_cpp[i])
-        elif planet_name == "Planet B" and selected_option == "C++":
+        elif planet_name == "Venus" and selected_option == "C++":
             button_command = partial(show_question_page, planet_name, selected_option, questions_cpp_code[i], answers_cpp_code[i], correct_answers_cpp_code[i])
-        elif planet_name == "Planet C" and selected_option == "C++":
+        elif planet_name == "Saturn" and selected_option == "C++":
             button_command = partial(show_question_page_with_code, planet_name, selected_option, questions_cpp1[i], code_cpp1[i], answers_cpp1[i],correct_answers_cpp1[i])
         else:
             button_command = lambda: print(f"Exercițiu {i + 1} selectat pentru {planet_name}, dar fără întrebări.")
@@ -353,7 +388,7 @@ def show_new_options_page(planet_name, selected_option):
     # Buton "Înapoi" care revine la pagina principală
     back_button = tk.Button(
        bg_image,
-        text="Înapoi",
+        text="Undo",
         font=('Gill Sans Ultra Bold', 15),
         fg='white',
         bg='#180451',
@@ -587,9 +622,9 @@ correct_answers_javascript_error = [
 ]
 
 user_progress = {
-    "Python": {"Planet A": 0, "Planet B": 0, "Planet C": 0},
-    "JavaScript": {"Planet A": 0, "Planet B": 0, "Planet C": 0},
-    "C++": {"Planet A": 0, "Planet B": 0, "Planet C": 0}
+    "Python": {"Uranus": 0, "Venus": 0, "Saturn": 0},
+    "JavaScript": {"Uranus": 0, "Venus": 0, "Saturn": 0},
+    "C++": {"Uranus": 0, "Venus": 0, "Saturn": 0}
 }
 
 # Funcție de salvare a progresului în JSON
@@ -609,14 +644,7 @@ def load_progress():
 user_progress = load_progress()
 
 # Modificăm `handle_answer()` pentru a înregistra răspunsurile corecte
-def handle_answer(selected_answer, button, planet_name, selected_option, correct_answer):
-    """Schimbă culoarea butonului și salvează progresul."""
-    if selected_answer == correct_answer:
-        button.config(bg="green")
-        user_progress[selected_option][planet_name] += 1  # Incrementăm progresul
-        save_progress()  # Salvăm progresul
-    else:
-        button.config(bg="red")
+
 
 # Funcție pentru a afișa progresul utilizatorului
 def show_progress():
@@ -627,6 +655,61 @@ def show_progress():
             progress_message += f"  {planet}: {correct_count} întrebări corecte\n"
     
     messagebox.showinfo("Progress", progress_message)
+def play_question_video(video_path, question_function, planet_name, selected_option):
+    # Creăm o fereastră nouă de ecran complet
+    window_video = tk.Toplevel()
+    window_video.attributes('-fullscreen', True)  # Setăm fereastra pe ecran complet
+    window_video.title("Videoclip")
+
+    # Creăm playerul video
+    video_player = TkinterVideo(master=window_video, scaled=True)
+    video_player.load(video_path)
+    video_player.pack(fill="both", expand=True)
+
+    # Redăm videoclipul automat
+    video_player.play()
+
+    # Detectăm când videoclipul s-a terminat
+    def on_video_end(event):
+        window_video.destroy()  # Închide fereastra videoclipului
+        question_function(planet_name, selected_option)  # Revenim la întrebare
+
+    video_player.bind("<<Ended>>", on_video_end)
+    # Verificăm manual când videoclipul s-a terminat (pentru cazuri unde `<<Ended>>` nu funcționează)
+    def check_video_status():
+        if not video_player.is_playing():  # Dacă nu mai rulează, revenim la întrebare
+            window_video.destroy()
+            question_function(planet_name, selected_option)
+        else:
+            window_video.after(1000, check_video_status)
+
+    check_video_status()
+
+# Funcție pentru afișarea paginii cu întrebări
+def handle_answer(selected_answer, button, planet_name, selected_option, correct_answer):
+    global user_progress, buttons  # Acces la variabilele globale
+    
+    for btn in buttons:
+        btn.config(state="disabled")
+    if selected_answer == correct_answer:
+        button.config(bg="green")
+        
+        # Contorizăm răspunsul corect
+        if selected_option not in user_progress:
+            user_progress[selected_option] = {}
+        if planet_name not in user_progress[selected_option]:
+            user_progress[selected_option][planet_name] = 0
+        
+        user_progress[selected_option][planet_name] += 1  # Incrementăm numărul de răspunsuri corecte
+        save_progress()  # Salvăm progresul utilizatorului
+
+        play_question_video(r"C:\Users\Adriana\infoeducatie.2-1\WhatsApp Video 2025-05-17 at 22.04.13_3d19574a.mp4", show_question_page, planet_name, selected_option)
+    else:
+        button.config(bg="red")
+        play_question_video(r"C:\Users\Adriana\infoeducatie.2-1\WhatsApp Video 2025-05-17 at 22.12.34_8b843c0c.mp4", show_question_page, planet_name, selected_option)
+
+    # Dezactivăm toate butoanele din listă
+
 def show_question_page(planet_name, selected_option, question, answer_options, correct_answer):
     for widget in root.winfo_children():
         widget.destroy()
@@ -637,28 +720,17 @@ def show_question_page(planet_name, selected_option, question, answer_options, c
     title_label = tk.Label(root, text=question, font=('Gill Sans Ultra Bold', 18), fg='white', bg='#711adf', wraplength=500)
     title_label.pack(pady=20)
 
-    def handle_answer(selected_answer, button, planet_name, selected_option, correct_answer):
-        global user_progress  # Asigură acces la variabila globală
-    
-        if selected_answer == correct_answer:
-            button.config(bg="green")
-        
-        # Verificăm dacă opțiunea și planeta există în user_progress
-            if selected_option in user_progress and planet_name in user_progress[selected_option]:
-                user_progress[selected_option][planet_name] += 1
-            else:
-                print("Eroare: Planeta sau opțiunea nu există în user_progress!")
-                save_progress()  
-        else:
-            button.config(bg="red")
+    global buttons
+    buttons = []  # Inițializăm lista de butoane înainte de crearea lor
 
     for answer in answer_options:
         btn = tk.Button(root, text=answer, font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451')
-        btn.config(command=lambda a=answer, b=btn: handle_answer(a, b))
+        btn.config(command=lambda a=answer, b=btn: handle_answer(a, b, planet_name, selected_option, correct_answer))
         btn.pack(pady=5)
+        buttons.append(btn)  # Adăugăm fiecare buton în listă
 
-    # Buton "Înapoi" care revine la pagina de exerciții a planetei și opțiunii selectate
-    back_button = tk.Button(root, text="Înapoi", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451',
+    # Buton "Înapoi" care revine la pagina de exerciții
+    back_button = tk.Button(root, text="Undo", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451',
                             command=lambda: show_new_options_page(planet_name, selected_option))
     back_button.pack(pady=20)
 
@@ -733,6 +805,28 @@ correct_answers_python_c = [
     "Linia 1",
     "Linia 1"
 ]
+def handle_answer(selected_answer, button, planet_name, selected_option, correct_answer):
+    global user_progress, buttons  # Acces la variabilele globale
+    
+    for btn in buttons:
+        btn.config(state="disabled")
+    if selected_answer == correct_answer:
+        button.config(bg="green")
+        
+        # Contorizăm răspunsul corect
+        if selected_option not in user_progress:
+            user_progress[selected_option] = {}
+        if planet_name not in user_progress[selected_option]:
+            user_progress[selected_option][planet_name] = 0
+        
+        user_progress[selected_option][planet_name] += 1  # Incrementăm numărul de răspunsuri corecte
+        save_progress()  # Salvăm progresul utilizatorului
+
+        play_question_video(r"C:\Users\Adriana\infoeducatie.2-1\WhatsApp Video 2025-05-17 at 22.04.13_3d19574a.mp4", show_question_page, planet_name, selected_option)
+    else:
+        button.config(bg="red")
+        play_question_video(r"C:\Users\Adriana\infoeducatie.2-1\WhatsApp Video 2025-05-17 at 22.12.34_8b843c0c.mp4", show_question_page, planet_name, selected_option)
+       
 def show_question_page_with_code(planet_name, selected_option,question, code_sample, answer_options, correct_answer):
     """Afișează codul și permite utilizatorului să aleagă unde este eroarea."""
     for widget in root.winfo_children():
@@ -745,20 +839,15 @@ def show_question_page_with_code(planet_name, selected_option,question, code_sam
 
     code_label = tk.Label(root, text=code_sample, font=('Courier', 14), fg='white', bg='#180451', justify="left")
     code_label.pack(pady=20)
-
-    def handle_answer(selected_answer, button):
-        """Schimbă culoarea butonului în funcție de răspunsul ales."""
-        if selected_answer == correct_answer:
-            button.config(bg="green")
-        else:
-            button.config(bg="red")
-
+    global buttons
+    buttons = []
     for answer in answer_options:
         btn = tk.Button(root, text=answer, font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451')
-        btn.config(command=lambda a=answer, b=btn: handle_answer(a, b))
+        btn.config(command=lambda a=answer, b=btn: handle_answer(a, b, planet_name, selected_option, correct_answer))
         btn.pack(pady=5)
+        buttons.append(btn)
 
-    back_button = tk.Button(root, text="Înapoi", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=lambda: show_new_options_page(planet_name, selected_option))
+    back_button = tk.Button(root, text="Undo", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=lambda: show_new_options_page(planet_name, selected_option))
     back_button.pack(pady=20)
 
 
