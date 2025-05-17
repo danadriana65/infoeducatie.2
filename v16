@@ -12,6 +12,10 @@ import json
 import smtplib
 from email.mime.text import MIMEText
 from functools import partial
+import pandas as pd
+from pathlib import Path
+import bcrypt
+
 # Define a global variable to store the username
 user_input = ""
 def get_asset_path(filename):
@@ -101,7 +105,30 @@ def show_grid():
     
     submit = tk.Button(container, text='Submit', font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=submit_username)
     submit.grid(row=5, column=0, columnspan=2, padx=10, pady=20, sticky="ew")
-   
+
+def save_user_data(username, email, password):
+    # Hash-uim parola înainte de salvare
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+    # Creăm dicționarul cu datele utilizatorului
+    user_data = {"Username": username, "Email": email, "Password": hashed_password}
+
+    # Salvăm datele într-un fișier JSON
+    with open("user_data.json", "w") as f:
+        json.dump(user_data, f, indent=4)
+
+def load_user_data():
+    try:
+        with open("user_data.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+def verify_password(input_password, stored_hash):
+    return bcrypt.checkpw(input_password.encode('utf-8'), stored_hash.encode('utf-8'))
+
+# Încarcă datele și verifică parol
+
+# Exemplu de utilizare
 def submit_username():
     entered_username = username.get()
     entered_password = password.get()
@@ -115,10 +142,20 @@ def submit_username():
         # If all fields are valid, proceed
         global user_input
         global user_mail
+        on_submit()
+        save_user_data(entered_username, entered_password, entered_email)
+
+        # Încărcăm datele salvate
+        user_data = load_user_data()
+
+        # Verificăm parola introdusă doar dacă există în fișier
+        if "Password" in user_data and verify_password(entered_password, user_data["Password"]):
+            messagebox.showinfo("Succes", "Autentificare reușită!")
+        else:
+            messagebox.showerror("Eroare", "Parolă incorectă sau nesalvată!")
+
         user_input = entered_username
         user_mail = entered_email
-        on_submit()
-
      # Continuă jocul
 
 def on_submit():
@@ -218,7 +255,7 @@ def navigate_to_page(option):
     top_bar.pack(side=tk.TOP, fill=tk.X)
 
     # Add three buttons to the top bar
-    button1 = tk.Button(top_bar, text="Progress", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=lambda: print("Button 1 pressed"))
+    button1 = tk.Button(top_bar, text="Progress", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=show_progress)
     button1.pack(side=tk.LEFT, padx=10, pady=5)
 
     button2 = tk.Button(top_bar, text="LeaderBoard", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=lambda: print("Button 2 pressed"))
@@ -549,7 +586,47 @@ correct_answers_javascript_error = [
     "Linia 3"
 ]
 
+user_progress = {
+    "Python": {"Planet A": 0, "Planet B": 0, "Planet C": 0},
+    "JavaScript": {"Planet A": 0, "Planet B": 0, "Planet C": 0},
+    "C++": {"Planet A": 0, "Planet B": 0, "Planet C": 0}
+}
 
+# Funcție de salvare a progresului în JSON
+def save_progress():
+    with open("user_progress.json", "w") as f:
+        json.dump(user_progress, f, indent=4)
+
+# Funcție de încărcare a progresului din JSON
+def load_progress():
+    try:
+        with open("user_progress.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return user_progress  # Dacă fișierul nu există, folosește progresul inițial
+
+# Încărcăm progresul utilizatorului
+user_progress = load_progress()
+
+# Modificăm `handle_answer()` pentru a înregistra răspunsurile corecte
+def handle_answer(selected_answer, button, planet_name, selected_option, correct_answer):
+    """Schimbă culoarea butonului și salvează progresul."""
+    if selected_answer == correct_answer:
+        button.config(bg="green")
+        user_progress[selected_option][planet_name] += 1  # Incrementăm progresul
+        save_progress()  # Salvăm progresul
+    else:
+        button.config(bg="red")
+
+# Funcție pentru a afișa progresul utilizatorului
+def show_progress():
+    progress_message = "Progresul tău:\n"
+    for option, planets in user_progress.items():
+        progress_message += f"\n{option}:\n"
+        for planet, correct_count in planets.items():
+            progress_message += f"  {planet}: {correct_count} întrebări corecte\n"
+    
+    messagebox.showinfo("Progress", progress_message)
 def show_question_page(planet_name, selected_option, question, answer_options, correct_answer):
     for widget in root.winfo_children():
         widget.destroy()
