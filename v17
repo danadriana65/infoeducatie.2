@@ -103,8 +103,11 @@ def show_grid():
     password = tk.Entry(container, font=('Arial', 15), fg='white', bg='#180451', show='*')
     password.grid(row=4, column=1, padx=5, pady=5, sticky="w")
     
-    submit = tk.Button(container, text='Submit', font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=submit_username)
+    submit = tk.Button(container, text='Crează Cont', font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=submit_username)
     submit.grid(row=5, column=0, columnspan=2, padx=10, pady=20, sticky="ew")
+    login_button = tk.Button(container, text='Login', font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=login)
+    login_button.grid(row=6, column=0, columnspan=2, padx=10, pady=20, sticky="ew")
+
     sign_out_button = tk.Button(
     root,
     text="Sign Out",
@@ -139,59 +142,62 @@ def sign_out():
     # Reîncărcăm pagina de login
     show_grid()
 
-def save_user_data(username, email, password):
-    # Hash-uim parola înainte de salvare
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-    # Creăm dicționarul cu datele utilizatorului
-    user_data = {"Username": username, "Email": email, "Password": hashed_password}
-
-    # Salvăm datele într-un fișier JSON
-    with open("user_data.json", "w") as f:
-        json.dump(user_data, f, indent=4)
 
 def load_user_data():
     try:
-        with open("user_data.json", "r") as f:
+        with open("user_credentials.json", "r") as f:
             return json.load(f)
     except FileNotFoundError:
         return {}
-def verify_password(input_password, stored_hash):
-    return bcrypt.checkpw(input_password.encode('utf-8'), stored_hash.encode('utf-8'))
 
-# Încarcă datele și verifică parol
+def store_user_info(username, password, email):  # Modificat numele funcției
+    user_data = load_user_data()
+    
+    if username in user_data:
+        messagebox.showerror("Eroare", "Utilizatorul există deja! Încearcă să te autentifici.")
+    else:
+        user_data[username] = {"password": password, "email": email}
+        with open("user_credentials.json", "w") as f:
+            json.dump(user_data, f, indent=4)
+        messagebox.showinfo("Succes", "Contul a fost creat!")
 
-# Exemplu de utilizare
+def verify_user(username, password):
+    user_data = load_user_data()
+    return user_data.get(username, {}).get("password") == password
+
 def submit_username():
+    global user_mail
+    global user_input
     entered_username = username.get()
     entered_password = password.get()
     entered_email = your_email.get()
 
-    # Verify if all fields are completed
     if not entered_username or not entered_password or not entered_email:
-        # Show an error popup with the message
         messagebox.showerror("Eroare de Autentificare", "Autentifică-te!")
     else:
-        # If all fields are valid, proceed
-        global user_input
-        global user_mail
-        on_submit()
-        save_user_data(entered_username, entered_password, entered_email)
+        store_user_info(entered_username, entered_password, entered_email)
+        user_mail = entered_email  # Setăm email-ul utilizatorului
+        user_input = entered_username   # Modificat aici
+        messagebox.showinfo("Succes", "Contul a fost creat!")
+        on_submit()  
 
-        # Încărcăm datele salvate
-        user_data = load_user_data()
+def login():
+    global user_mail
+    global user_input
+    entered_username = username.get()
+    entered_password = password.get()
 
-        # Verificăm parola introdusă doar dacă există în fișier
-        if "Password" in user_data and verify_password(entered_password, user_data["Password"]):
-            messagebox.showinfo("Succes", "Autentificare reușită!")
+    if entered_username in load_user_data():
+        if verify_user(entered_username, entered_password):
+            messagebox.showinfo("Autentificare reușită", "Te-ai conectat cu succes!")
+            user_mail = user_data[entered_username]["email"]  # Setăm email-ul
+            user_input = entered_username
+            on_submit()
         else:
-            messagebox.showerror("Eroare", "Parolă incorectă sau nesalvată!")
-
-        user_input = entered_username
-        user_mail = entered_email
-
-
-     # Continuă jocul
+            messagebox.showerror("Eroare", "Parolă incorectă! Încearcă din nou.")
+            password.delete(0, tk.END)  
+    else:
+        messagebox.showerror("Eroare", "Nu există acest cont! Creează unul mai întâi.")
 
 def on_submit():
     for widget in root.winfo_children():
@@ -293,7 +299,7 @@ def navigate_to_page(option):
     button1 = tk.Button(top_bar, text="Progress", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=show_progress)
     button1.pack(side=tk.LEFT, padx=10, pady=5)
 
-    button2 = tk.Button(top_bar, text="LeaderBoard", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=lambda: print("Button 2 pressed"))
+    button2 = tk.Button(top_bar, text="LeaderBoard", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=show_leaderboard)
     button2.pack(side=tk.LEFT, padx=20, pady=5)
 
     button3 = tk.Button(top_bar, text="Profile", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=open_profile_window)
@@ -645,6 +651,20 @@ user_progress = load_progress()
 
 # Modificăm `handle_answer()` pentru a înregistra răspunsurile corecte
 
+def show_leaderboard():
+    total_correct = sum(correct_count for planets in user_progress.values() for correct_count in planets.values())
+
+    # Determinăm premiul
+    if total_correct >= 21:
+        award = "🏆 Aur"
+    elif total_correct >= 14:
+        award = "🥈 Argint"
+    elif total_correct >= 7:
+        award = "🥉 Bronz"
+    else:
+        award = "🔹 Fără medalie - mai încearcă!"
+
+    messagebox.showinfo("Leaderboard", f"Premiul tău: {award}\nAi răspuns corect la {total_correct} întrebări!")
 
 # Funcție pentru a afișa progresul utilizatorului
 def show_progress():
@@ -892,6 +912,7 @@ def open_settings_window():
     global user_input  # Reference the username variable
     global user_mail
     global profile_label
+    user_data = load_user_data()  # Adăugat pentru acces la datele utilizatorului
 
     # Create a new top-level window for settings
     settings_window = tk.Toplevel(root)

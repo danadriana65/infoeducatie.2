@@ -1,8 +1,8 @@
 {
     "Python": {
         "Uranus": 0,
-        "Venus": 0,
-        "Saturn": 0
+        "Venus": 1,
+        "Saturn": 2
     },
     "JavaScript": {
         "Uranus": 0,
@@ -10,7 +10,7 @@
         "Saturn": 1
     },
     "C++": {
-        "Uranus": 1,
+        "Uranus": 3,
         "Venus": 0,
         "Saturn": 0
     }
