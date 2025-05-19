@@ -18,6 +18,11 @@ import bcrypt
 
 # Define a global variable to store the username
 user_input = ""
+root = tk.Tk()
+root.geometry('900x600')  # Adjust for practical size
+root.title('Welcome to app!')
+
+
 def get_asset_path(filename):
     """
     Returns the path of a file, whether the script is run normally or packaged with PyInstaller.
@@ -142,35 +147,46 @@ def sign_out():
     # Reîncărcăm pagina de login
     show_grid()
 
-
 def load_user_data():
     try:
         with open("user_credentials.json", "r") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {}
+            data = json.load(f)
+            return data if data else {}  # Dacă fișierul e gol, returnează un dicționar gol
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}  # Dacă fișierul nu există sau nu se poate citi, inițializăm un dicționar gol
 
-def store_user_info(username, password, email):  # Modificat numele funcției
-    user_data = load_user_data()
+
+def store_user_info(username, password, email):
+    user_data = load_user_data()  # Încărcăm datele existente
     
     if username in user_data:
         messagebox.showerror("Eroare", "Utilizatorul există deja! Încearcă să te autentifici.")
     else:
         user_data[username] = {"password": password, "email": email}
+
+        # ✅ Salvăm permanent datele
         with open("user_credentials.json", "w") as f:
             json.dump(user_data, f, indent=4)
+
         messagebox.showinfo("Succes", "Contul a fost creat!")
 
 def verify_user(username, password):
     user_data = load_user_data()
-    return user_data.get(username, {}).get("password") == password
+
+    if username not in user_data:
+        return False  # Username-ul nu există
+    if "password" not in user_data[username]:
+        return False  # Parola nu este salvată corect
+
+    return user_data[username]["password"] == password
+
 
 def submit_username():
     global user_mail
     global user_input
-    entered_username = username.get()
-    entered_password = password.get()
-    entered_email = your_email.get()
+    entered_username = username.get().strip()
+    entered_password = password.get().strip()
+    entered_email = your_email.get().strip()
 
     if not entered_username or not entered_password or not entered_email:
         messagebox.showerror("Eroare de Autentificare", "Autentifică-te!")
@@ -182,12 +198,13 @@ def submit_username():
         on_submit()  
 
 def login():
-    global user_mail
-    global user_input
-    entered_username = username.get()
-    entered_password = password.get()
+    global user_mail, user_input
+    entered_username = username.get().strip()
+    entered_password = password.get().strip()
 
-    if entered_username in load_user_data():
+    user_data = load_user_data()  # ✅ Încărcăm datele salvate
+
+    if entered_username in user_data:
         if verify_user(entered_username, entered_password):
             messagebox.showinfo("Autentificare reușită", "Te-ai conectat cu succes!")
             user_mail = user_data[entered_username]["email"]  # Setăm email-ul
@@ -198,6 +215,7 @@ def login():
             password.delete(0, tk.END)  
     else:
         messagebox.showerror("Eroare", "Nu există acest cont! Creează unul mai întâi.")
+
 
 def on_submit():
     for widget in root.winfo_children():
@@ -509,26 +527,26 @@ correct_answers_cpp = [
 ]
 
 questions = [
-    "Care este cea mai mare planetă din sistemul solar?",
-    "Câte planete există în sistemul solar?",
-    "Cine a fost primul om care a pășit pe Lună?",
-    "Ce planetă este cunoscută drept „Planeta Roșie”?",
-    "Care este cea mai apropiată stea de Pământ?",
-    "Ce planetă are cele mai multe inele?",
-    "Ce planetă are o zi mai lungă decât un an?"
-]
+    "Ce este metoda __new__() în Python?",
+    "Ce face @staticmethod în Python?",
+    "Care este diferența dintre deepcopy() și copy()?",
+    "Ce va returna list(map(lambda x: x**2, range(3)))?",
+    'Ce face expresia if __name__ == "__main__": în Python?',
+    "Care dintre următoarele NU este o metodă validă pentru sincronizarea thread-urilor în Python?",
+    "Ce rezultat va avea print(bool([]) == False)?" ]
+  
 
 answers = [
-    ["Jupiter", "Saturn", "Neptun", "Uranus"],
-    ["8", "9", "7", "6"],
-    ["Neil Armstrong", "Buzz Aldrin", "Yuri Gagarin", "Michael Collins"],
-    ["Marte", "Venus", "Mercur", "Pământ"],
-    ["Soarele", "Proxima Centauri", "Betelgeuse", "Sirius"],
-    ["Saturn", "Jupiter", "Uranus", "Neptun"],
-    ["Venus", "Mercur", "Marte", "Neptun"]
+    ["O metodă care creează o instanță înainte de __init__()", "O metodă folosită doar în moștenirea multiplă", "O metodă specială care returnează self", "O metodă de conversie între tipuri de date"],
+    ["Creează o metodă care poate fi apelată doar de alte clase", "Definește o metodă statică care nu are acces la self", "Permite accesul la metodele private din clasă", "Transformă metoda într-o variabilă de clasă"],
+    ["deepcopy() face conversia tipurilor de date", "copy() elimină referințele către obiectele originale", "deepcopy() este mai rapid decât copy()", "copy() creează o copie superficială, iar deepcopy() copiază recursiv obiectele"],
+    ["[1, 4, 9]", "[0, 2, 4]", "[0, 1, 4]", "[1, 2, 3]"],
+    ["Creează o variabilă globală numită __main__", "Permite executarea în paralel a mai multor funcții", "Determină dacă scriptul este executat direct", "Verifică dacă scriptul este importat din alt modul"],
+    ["threading.Event()", "threading.pause()", "threading.Lock()", "threading.Semaphore()"],
+    ["True", "False", "Va genera o eroare", "None"]
 ]
 
-correct_answers = ["Jupiter", "8", "Neil Armstrong", "Marte", "Soarele", "Saturn", "Venus"]
+correct_answers = ["O metodă care creează o instanță înainte de __init__()", "Definește o metodă statică care nu are acces la self", "copy() creează o copie superficială, iar deepcopy() copiază recursiv obiectele", "[0, 1, 4]", "Determină dacă scriptul este executat direct", "threading.pause()", "True"]
 questions_javascript_a = [
     "Cum declarăm o variabilă în JavaScript?",
     "Care dintre următoarele NU este un mod valid de a declara o funcție?",
@@ -645,7 +663,19 @@ def load_progress():
             return json.load(f)
     except FileNotFoundError:
         return user_progress  # Dacă fișierul nu există, folosește progresul inițial
+def reset_progress():
+    global user_progress
+    user_progress = {
+        "Python": {"Uranus": 0, "Venus": 0, "Saturn": 0},
+        "JavaScript": {"Uranus": 0, "Venus": 0, "Saturn": 0},
+        "C++": {"Uranus": 0, "Venus": 0, "Saturn": 0}
+    }  # Resetăm progresul
 
+    with open("user_progress.json", "w") as f:
+        json.dump(user_progress, f, indent=4)  # Salvăm progresul resetat în fișier
+
+    root.destroy()  # Închidem aplicația după resetare
+  # Închidem aplicația după resetare
 # Încărcăm progresul utilizatorului
 user_progress = load_progress()
 
@@ -675,6 +705,8 @@ def show_progress():
             progress_message += f"  {planet}: {correct_count} întrebări corecte\n"
     
     messagebox.showinfo("Progress", progress_message)
+
+    root.protocol("WM_DELETE_WINDOW", reset_progress)
 def play_question_video(video_path, question_function, planet_name, selected_option):
     # Creăm o fereastră nouă de ecran complet
     window_video = tk.Toplevel()
@@ -697,11 +729,11 @@ def play_question_video(video_path, question_function, planet_name, selected_opt
     video_player.bind("<<Ended>>", on_video_end)
     # Verificăm manual când videoclipul s-a terminat (pentru cazuri unde `<<Ended>>` nu funcționează)
     def check_video_status():
-        if not video_player.is_playing():  # Dacă nu mai rulează, revenim la întrebare
-            window_video.destroy()
-            question_function(planet_name, selected_option)
+        if video_player.has_ended():  # Dacă videoclipul s-a terminat
+           window_video.destroy()
+           question_function(planet_name, selected_option)
         else:
-            window_video.after(1000, check_video_status)
+           window_video.after(1000, check_video_status)  # Verificăm periodic
 
     check_video_status()
 
@@ -971,9 +1003,6 @@ def open_settings_window():
     )
     remove_picture_button.pack(pady=20)
 
-root = tk.Tk()
-root.geometry('900x600')  # Adjust for practical size
-root.title('Welcome to app!')
 
 settings_button = tk.Button(
     root,
