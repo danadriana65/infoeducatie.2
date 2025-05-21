@@ -377,11 +377,11 @@ def show_new_options_page(planet_name, selected_option):
         text=f"Options for {planet_name}",
         font=('Gill Sans Ultra Bold', 20),
         fg='white',
-        bg='#711adf'
+        bg='#a924f0'
     )
     title_label.pack(pady=20)
-    buttons_frame = tk.Frame(root, bg='#711adf')
-    buttons_frame.pack(pady=70)
+    buttons_frame = tk.Frame(root, bg='#a924f0')
+    buttons_frame.pack(pady=80)
     # Generate 7 dynamic buttons
     for i in range(7):
         if planet_name == "Uranus" and selected_option == "Python":
@@ -404,8 +404,8 @@ def show_new_options_page(planet_name, selected_option):
             button_command = partial(show_question_page_with_code, planet_name, selected_option, questions_cpp1[i], code_cpp1[i], answers_cpp1[i],correct_answers_cpp1[i])
         else:
             button_command = lambda: print(f"Exercițiu {i + 1} selectat pentru {planet_name}, dar fără întrebări.")
-        button = tk.Button(buttons_frame, text=f"Exercițiu {i + 1}", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=button_command)
-        button.grid(row=i//2, column=i%2, padx=40, pady=50)  # 2 coloane
+        button = tk.Button(buttons_frame, text=f"Exercițiu {i + 1}", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451',width=15, height=2, command=button_command)
+        button.grid(row=i//2, column=i%2, padx=20, pady=30)  # 2 coloane
         
 
     # Buton "Înapoi" care revine la pagina principală
@@ -414,7 +414,7 @@ def show_new_options_page(planet_name, selected_option):
         text="Undo",
         font=('Gill Sans Ultra Bold', 15),
         fg='white',
-        bg='#180451',
+        bg='#a924f0',
         command=lambda: on_submit()
     )
     back_button.place(relx=0.2, rely=0.2, anchor=tk.CENTER)
@@ -482,10 +482,10 @@ questions_cpp_code = [
 ]
 
 answers_cpp_code = [
-    ["void myFunction();", "function myFunction();", "func myFunction();"],
+    ["function myFunction();", "void myFunction();", "func myFunction();"],
     ["for (i = 0; i < n; i++)", "for i in range(0, n)", "loop (i; i < n; i++)"],
     ["vector[2]", "vector(2)", "vector -> 2"],
-    ["int *ptr = new int;", "int ptr = malloc(sizeof(int));", "alloc<int> ptr;"],
+    ["alloc<int> ptr;", "int ptr = malloc(sizeof(int));", "int *ptr = new int;"],
     ["class Child : Parent {}", "class Parent -> Child {}", "inherit Parent -> Child {}"],
     ["cin >> x;", "input(x);", "x = scan();"],
     ["~MyClass() {}", "destructor MyClass() {}", "destroy MyClass();"]
@@ -588,11 +588,11 @@ questions_javascript_code = [
 answers_javascript_code = [
     ["let func = function() {}", "let func() {}", "function = func() {}"],
     ["const add = (a, b) => a + b;", "add = (a, b) { return a + b; }", "function add(a, b) => a + b;"],
-    ["const obj = { name: 'Alex', age: 25 }", "object obj = { 'name': 'Alex', 'age': 25 }", "let obj = object { name: 'Alex', age: 25 };"],
+    ["let obj = object { name: 'Alex', age: 25 };", "object obj = { 'name': 'Alex', 'age': 25 }", "const obj = { name: 'Alex', age: 25 }"],
     ["array.forEach(item => console.log(item));", "for (item in array) { console.log(item); }", "array.each(item => console.log(item));"],
-    ["array.includes(5)", "array.has(5)", "array.exists(5)"],
+    ["array.has(5)", "array.includes(5)", "array.exists(5)"],
     ["const { name, age } = obj;", "destructure(obj).get('name', 'age');", "let name, age = obj.extract();"],
-    ["array.push('newItem')", "array.add('newItem')", "array.insert('newItem')"]
+    ["array.add('newItem')", "array.push('newItem')", "array.insert('newItem')"]
 ]
 
 correct_answers_javascript_code = [
@@ -625,9 +625,9 @@ code_samples_javascript_error = [
 ]
 
 answers_javascript_error = [
+    ["Linia 2", "Linia 1", "Linia 3", "Nicio eroare"],
     ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
-    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
-    ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
+    ["Linia 3", "Linia 2", "Linia 1", "Nicio eroare"],
     ["Linia 2", "Linia 3", "Linia 1", "Nicio eroare"],
     ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
     ["Linia 1", "Linia 2", "Linia 3", "Nicio eroare"],
@@ -784,9 +784,9 @@ def show_question_page(planet_name, selected_option, question, answer_options, c
     buttons = []  # Inițializăm lista de butoane înainte de crearea lor
 
     for answer in answer_options:
-        btn = tk.Button(root, text=answer, font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451')
+        btn = tk.Button(root, text=answer, font=('Gill Sans Ultra Bold', 17), fg='white', bg='#180451', wraplength=500, anchor="w")
         btn.config(command=lambda a=answer, b=btn: handle_answer(a, b, planet_name, selected_option, correct_answer))
-        btn.pack(pady=5)
+        btn.pack(fill="both", expand=True, padx=10, pady=5)
         buttons.append(btn)  # Adăugăm fiecare buton în listă
 
     # Buton "Înapoi" care revine la pagina de exerciții
@@ -897,14 +897,14 @@ def show_question_page_with_code(planet_name, selected_option,question, code_sam
     title_label = tk.Label(root, text=question, font=('Gill Sans Ultra Bold', 18), fg='white', bg='#711adf', wraplength=500)
     title_label.pack(pady=20)
 
-    code_label = tk.Label(root, text=code_sample, font=('Courier', 14), fg='white', bg='#180451', justify="left")
-    code_label.pack(pady=20)
+    code_label = tk.Label(root, text=code_sample, font=('Courier', 14), fg='white', bg='#180451', justify="left",wraplength=500, anchor="w")
+    code_label.pack(fill="both", expand=True, padx=10, pady=5)
     global buttons
     buttons = []
     for answer in answer_options:
-        btn = tk.Button(root, text=answer, font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451')
+        btn = tk.Button(root, text=answer, font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451',wraplength=500, anchor="w")
         btn.config(command=lambda a=answer, b=btn: handle_answer(a, b, planet_name, selected_option, correct_answer))
-        btn.pack(pady=5)
+        btn.pack(fill="both", expand=True, padx=10, pady=5)
         buttons.append(btn)
 
     back_button = tk.Button(root, text="Undo", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=lambda: show_new_options_page(planet_name, selected_option))
