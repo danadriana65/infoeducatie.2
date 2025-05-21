@@ -164,7 +164,6 @@ def store_user_info(username, password, email):
     else:
         user_data[username] = {"password": password, "email": email}
 
-        # ✅ Salvăm permanent datele
         with open("user_credentials.json", "w") as f:
             json.dump(user_data, f, indent=4)
 
