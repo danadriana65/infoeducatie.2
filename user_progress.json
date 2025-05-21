@@ -1,6 +1,6 @@
 {
     "Python": {
-        "Uranus": 1,
+        "Uranus": 0,
         "Venus": 0,
         "Saturn": 0
     },
@@ -11,7 +11,7 @@
     },
     "C++": {
         "Uranus": 0,
-        "Venus": 1,
+        "Venus": 0,
         "Saturn": 0
     }
 }

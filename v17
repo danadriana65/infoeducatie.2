@@ -692,19 +692,28 @@ def show_leaderboard():
         award = "🥉 Bronz"
     else:
         award = "🔹 Fără medalie - mai încearcă!"
-
-    messagebox.showinfo("Leaderboard", f"Premiul tău: {award}\nAi răspuns corect la {total_correct} întrebări!")
-
+    leaderboard_window = tk.Toplevel()
+    leaderboard_window.title("Leaderboard")
+    leaderboard_window.configure(bg="#002366")
+    label = tk.Label(leaderboard_window, text=f"Premiul tău: {award}\nAi răspuns corect la {total_correct} întrebări!",
+                     font=("Arial", 14), fg="white", bg="#002366")
+    label.pack(padx=20, pady=20)
+   
 # Funcție pentru a afișa progresul utilizatorului
 def show_progress():
+    progress_window = tk.Toplevel()
+    progress_window.title("Progress")
+    progress_window.configure(bg="#002366")  # Albastru închis
+
     progress_message = "Progresul tău:\n"
     for option, planets in user_progress.items():
         progress_message += f"\n{option}:\n"
         for planet, correct_count in planets.items():
             progress_message += f"  {planet}: {correct_count} întrebări corecte\n"
-    
-    messagebox.showinfo("Progress", progress_message)
 
+    label = tk.Label(progress_window, text=progress_message,
+                     font=("Arial", 14), fg="white", bg="#002366", justify="left")
+    label.pack(padx=20, pady=20)
     root.protocol("WM_DELETE_WINDOW", reset_progress)
 def play_question_video(video_path, question_function, planet_name, selected_option):
     # Creăm o fereastră nouă de ecran complet
