@@ -127,9 +127,7 @@ def show_grid():
 
 def sign_out():
     global user_input, user_mail
-    user_input = ""
-    user_mail = ""
-
+   
     # Ștergem utilizatorul curent din JSON
     user_data = load_user_data()
     if user_input in user_data:
@@ -138,6 +136,8 @@ def sign_out():
         # Salvăm datele actualizate
         with open("user_date.json", "w") as f:
             json.dump(user_data, f, indent=4)
+    user_input = ""
+    user_mail = ""
 
     # Resetăm câmpurile de autentificare
     username.delete(0, tk.END)
@@ -147,7 +147,7 @@ def sign_out():
     # Reîncărcăm pagina de login
     show_grid()
 
-def load_user_data():
+def load_user_credentials():
     try:
         with open("user_credentials.json", "r") as f:
             data = json.load(f)
@@ -157,7 +157,7 @@ def load_user_data():
 
 
 def store_user_info(username, password, email):
-    user_data = load_user_data()  # Încărcăm datele existente
+    user_data = load_user_credentials()  # Încărcăm datele existente
     
     if username in user_data:
         messagebox.showerror("Eroare", "Utilizatorul există deja! Încearcă să te autentifici.")
@@ -170,7 +170,7 @@ def store_user_info(username, password, email):
         messagebox.showinfo("Succes", "Contul a fost creat!")
 
 def verify_user(username, password):
-    user_data = load_user_data()
+    user_data = load_user_credentials()
 
     if username not in user_data:
         return False  # Username-ul nu există
@@ -201,7 +201,7 @@ def login():
     entered_username = username.get().strip()
     entered_password = password.get().strip()
 
-    user_data = load_user_data()  # ✅ Încărcăm datele salvate
+    user_data = load_user_credentials()  # ✅ Încărcăm datele salvate
 
     if entered_username in user_data:
         if verify_user(entered_username, entered_password):
@@ -323,9 +323,9 @@ def navigate_to_page(option):
     button3.pack(side=tk.LEFT, padx=50, pady=5)
     # Example planet images
     planet_images = {
-        "Uranus": PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\WhatsApp Image 2025-03-15 at 22.57.57_426e474f1.2.png"),  # Replace paths
-        "Venus": PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.3.png"),
-        "Saturn": PhotoImage(file=r"C:\Users\Adriana\Desktop\grid\WhatsApp Image 2025-03-15 at 22.57.57_426e474f.4.png"),}
+        "Uranus": PhotoImage(file=r"C:\Users\Adriana\infoeducatie.2-2\Uranus(1).png"),  # Replace paths
+        "Venus": PhotoImage(file=r"C:\Users\Adriana\infoeducatie.2-2\Venus.png"),
+        "Saturn": PhotoImage(file=r"C:\Users\Adriana\infoeducatie.2-2\Saturn.png"),}
 
     # Add planet buttons directly on the background image
     column = 0
