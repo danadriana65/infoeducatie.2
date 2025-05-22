@@ -2,16 +2,16 @@
     "Python": {
         "Uranus": 0,
         "Venus": 0,
-        "Saturn": 3
+        "Saturn": 0
     },
     "JavaScript": {
         "Uranus": 0,
         "Venus": 0,
-        "Saturn": 1
+        "Saturn": 0
     },
     "C++": {
         "Uranus": 0,
-        "Venus": 2,
-        "Saturn": 5
+        "Venus": 0,
+        "Saturn": 0
     }
 }
