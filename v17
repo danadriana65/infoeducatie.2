@@ -15,7 +15,7 @@ from functools import partial
 import pandas as pd
 from pathlib import Path
 import bcrypt
-
+import webbrowser
 # Define a global variable to store the username
 user_input = ""
 root = tk.Tk()
@@ -284,7 +284,6 @@ def on_submit():
     settings_button = tk.Button(root, text="Settings", font=('Gill Sans Ultra Bold', 15), fg='white', bg='#180451', command=open_settings_window)
     settings_button.place(relx=0.9, rely=0.1, anchor=tk.CENTER)
 
-
 def navigate_to_page(option):
     for widget in root.winfo_children():
         widget.destroy()
@@ -321,13 +320,30 @@ def navigate_to_page(option):
 
     button3 = tk.Button(top_bar, text="Profile", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=open_profile_window)
     button3.pack(side=tk.LEFT, padx=50, pady=5)
+    if option == "C++":
+        def open_link():
+            webbrowser.open("https://www.w3schools.com/cpp/cpp_syntax.asp")  # Înlocuiește cu linkul dorit
+
+        button4 = tk.Button(top_bar, text="Teorie C++", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=open_link)
+        button4.pack(side=tk.LEFT, padx=50, pady=5)
+    elif option == "Python":
+        def open_link():
+            webbrowser.open("https://www.w3schools.com/python/default.asp")  # Înlocuiește cu linkul dorit
+
+        button4 = tk.Button(top_bar, text="Teorie Pyhton", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=open_link)
+        button4.pack(side=tk.LEFT, padx=50, pady=5)
+    else:
+        def open_link():
+            webbrowser.open("https://www.w3schools.com/js/default.asp")  # Înlocuiește cu linkul dorit
+
+        button4 = tk.Button(top_bar, text="Teorie Javascript", font=('Gill Sans Ultra Bold', 12), fg='white', bg='#180451', command=open_link)
+        button4.pack(side=tk.LEFT, padx=50, pady=5)
     # Example planet images
     planet_images = {
-        "Uranus": PhotoImage(file=r"C:\Users\Adriana\infoeducatie.2-2\Uranus(1).png"),  # Replace paths
+        "Uranus": PhotoImage(file=r"C:\Users\Adriana\infoeducatie.2-2\Uranus(1).png"),
         "Venus": PhotoImage(file=r"C:\Users\Adriana\infoeducatie.2-2\Venus.png"),
         "Saturn": PhotoImage(file=r"C:\Users\Adriana\infoeducatie.2-2\Saturn.png"),}
 
-    # Add planet buttons directly on the background image
     column = 0
     for planet_name, planet_image in planet_images.items():
         if option == "Python":
