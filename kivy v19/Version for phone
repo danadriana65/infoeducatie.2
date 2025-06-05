@@ -7,9 +7,30 @@ from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 import os
 import sys
+import json
 from kivy.uix.textinput import TextInput
 from kivy.uix.filechooser import FileChooserListView
+from kivy.uix.floatlayout import FloatLayout
 from kivy.resources import resource_find
+
+def load_user_credentials():
+    try:
+        with open("user_credentials.json","r") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+            return {}
+def store_user_info(username, password, email):
+    user_data = load_user_credentials()
+    if username in user_data:
+        return "User already exists"
+    else:
+        user_data[username]={"password":password, "email":email}
+        with open("user_credentials","w") as f:
+            json.dump(user_data,f,indent=4)
+        return "Account created successfully"
+def verify_user(username, password):
+    user_data = load_user_credentials()
+    return username in user_data and user_data[username]["password"] == password
 
 class WelcomeScreen(Screen):
     def __init__(self, **kwargs):
@@ -60,60 +81,85 @@ class VideoScreen(Screen):
     def on_video_end(self, instance, value):
         if value == "stop":  # Detect video completion
             self.manager.current = "grid_screen"
+class LoginScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        layout = FloatLayout()
 
+        layout.add_widget(Label(text="Welcome to Cosmiccode!", font_size=24, pos_hint={"center_x": 0.5, "center_y": 0.85}))
+
+        self.username = TextInput(hint_text="Username", size_hint=(0.5, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.65})
+        layout.add_widget(self.username)
+
+        self.email = TextInput(hint_text="Your Email", size_hint=(0.5, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.55})
+        layout.add_widget(self.email)
+
+        self.password = TextInput(hint_text="Password", password=True, size_hint=(0.5, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.45})
+        layout.add_widget(self.password)
+
+        self.message_label = Label(text="", pos_hint={"center_x": 0.5, "center_y": 0.35})
+        layout.add_widget(self.message_label)
+
+        submit_button = Button(text="Create Account", size_hint=(0.3, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.25}, on_press=self.submit_username)
+        layout.add_widget(submit_button)
+
+        login_button = Button(text="Login", size_hint=(0.3, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.15}, on_press=self.login)
+        layout.add_widget(login_button)
+
+        self.add_widget(layout)
+
+    def submit_username(self, instance):
+        entered_username = self.username.text.strip()
+        entered_password = self.password.text.strip()
+        entered_email = self.email.text.strip()
+
+        if not entered_username or not entered_password or not entered_email:
+            self.message_label.text = "Error: Please fill all fields!"
+        else:
+            result = store_user_info(entered_username, entered_password, entered_email)
+            self.message_label.text = result
+
+    def login(self, instance):
+        entered_username = self.username.text.strip()
+        entered_password = self.password.text.strip()
+
+        if verify_user(entered_username, entered_password):
+            self.manager.get_screen("grid_screen").set_user_details(entered_username)  # Pass user data
+            self.manager.current = "grid_screen"
+        else:
+            self.message_label.text = "Invalid credentials!"
 class GridScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        layout = BoxLayout(orientation="vertical")
-        
-        self.video_path = "C:/Users/Adriana/Desktop/grid/WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
-        if not os.path.exists(self.video_path):
-              self.layout.add_widget(Label(text="Background video file not found! Please select a file."))
-        else:
-              self.video_player=VideoPlayer(source=self.video_path, state="play", options={"eos": "pause"})
-              self.video_player.bind(state=self.loop_video)
-              self.layout.add_widget(self.video_player)
-        
-        self.layout.add_widget(Label(text="Welcome to Cosmiccode!",font_size=24))
-        self.layout.add_widget(Label(text="Enter your username and password and let's start a cosmic game!", font_size=15))
+        self.layout = FloatLayout()
 
-        self.layout.add_widget(text="Username")
-        self.username=TextInput(font_size=15)
-        self.layout.add_widget(self.username)
+        # Background Video
+        self.video_path = r"C:\Users\Adriana\infoeducatie.2-3\infoeducatie.2\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
+        if os.path.exists(self.video_path):
+            self.video_player = VideoPlayer(source=self.video_path, play=True, options={"eos": "loop"})
+            self.layout.add_widget(self.video_player)
 
-        self.layout.add_widget(text="Your e-mail")
-        self.your_email=TextInput(font_size=15)
-        self.layout.add_widget(self.your_email)
+        # Overlay UI Elements
+        self.welcome_label = Label(text="Welcome, User!", font_size=24, pos_hint={"center_x": 0.5, "center_y": 0.85})
+        self.layout.add_widget(self.welcome_label)
 
-        self.layout.add_widget(text="Password")
-        self.password=TextInput(font_size=15, password=True)
-        self.layout.add_widget(self.password)
-
-        submit_button = Button(text="Create account", on_press=self.submit_username)
-        self.layout.add_widget(submit_button)
-
-        login_button = Button(text="Login",on_press=self.login)
-        self.layout.add_widget(login_button)
-        
-        sign_out_button = Button(text="Sign Out", on_press=self.sign_out)
+        sign_out_button = Button(text="Sign Out", size_hint=(0.3, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.15}, on_press=self.sign_out)
         self.layout.add_widget(sign_out_button)
 
         self.add_widget(self.layout)
-    
-    def submit_username(self, instance):
-        print(f"Username: {self.username.text}, Email: {self.your_email.text}, Password: {self.password.text}")
 
-    def login(self, instance):
-        print("Login action triggered!")
+    def set_user_details(self, username):
+        self.welcome_label.text = f"Welcome, {username}!"
 
     def sign_out(self, instance):
-        print("Sign Out action triggered!")
+        self.manager.current = "login_screen"
 class MyApp(App):
     def build(self):
         sm = ScreenManager()
         sm.add_widget(WelcomeScreen(name="welcome_screen"))
         sm.add_widget(VideoScreen(name="video_screen"))
         sm.add_widget(GridScreen(name="grid_screen"))
+        sm.add_widget(LoginScreen(name="login_screen"))
         return sm
 
 MyApp().run()
