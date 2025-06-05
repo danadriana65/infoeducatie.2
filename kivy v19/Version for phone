@@ -1,53 +1,119 @@
+import kivy
 from kivy.app import App
-from kivy.uix.videoplayer import VideoPlayer
+from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.label import Label
+from kivy.uix.videoplayer import VideoPlayer
+from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 import os
 import sys
-from kivy.uix.button import Button
+from kivy.uix.textinput import TextInput
 from kivy.uix.filechooser import FileChooserListView
 from kivy.resources import resource_find
-class MyApp(App):
-    def build(self):
-        layout = BoxLayout()
-        label = Label(text="Welcome to App!", font_size=24)
-        layout.add_widget(label)
-        return layout
-def get_asset_path(filename):
-    """
-    Returns the path of a file, whether the script is run normally or packaged with PyInstaller.
-    Uses Kivy's resource_find() for better asset handling.
-    """
-    if hasattr(sys, "_MEIPASS"):
-        return os.path.join(sys._MEIPASS, filename)
-    
-    # Use Kivy's resource_find() to locate assets properly
-    found_path = resource_find(filename)
-    return found_path if found_path else filename
-class VideoApp(App):
-    def build(self):
-        self.layout = BoxLayout(orientation='vertical')
-        default_video_path = "C:/Users/Adriana/Desktop/grid/WhatsApp Video 2025-03-31 at 12.10.50_af799974.mp4"
-        if not os.path.exists(default_video_path):
-           self.layout.add_widget(Label(text="Default video file not found! Please select a file."))
-           file_chooser= FileChooserListView(filters=["*.mp4"])
-           self.layout.add_widget(file_chooser)
 
-           select_button = Button(text="Select File")
-           select_button.bind(on_press = lambda x : self.play_video(file_chooser.selection))
-           self.layout.add_widget(select_button)
+class WelcomeScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        layout = BoxLayout(orientation="vertical")
+        layout.add_widget(Label(text="Welcome to App!", font_size=24))
+
+        start_button = Button(text="Start Video")
+        start_button.bind(on_press=self.go_to_video)
+        layout.add_widget(start_button)
+
+        self.add_widget(layout)
+
+    def go_to_video(self, instance):
+        self.manager.current = "video_screen"
+
+class VideoScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.layout = BoxLayout(orientation="vertical")
+
+        # Default video path
+        self.default_video_path = "C:/Users/Adriana/infoeducatie.2-3/WhatsApp Video 2025-03-31 at 12.10.50_af799974.mp4"
+
+        if not os.path.exists(self.default_video_path):
+            self.layout.add_widget(Label(text="Default video file not found! Please select a file."))
+
+            file_chooser = FileChooserListView(filters=["*.mp4"])
+            self.layout.add_widget(file_chooser)
+
+            select_button = Button(text="Select File")
+            select_button.bind(on_press=lambda x: self.play_video(file_chooser.selection))
+            self.layout.add_widget(select_button)
         else:
-            self.play_video(default_video_path)
-        return self.layout
+            self.play_video(self.default_video_path)
+
+        self.add_widget(self.layout)
+
     def play_video(self, video_path):
         if not video_path:
             return
+
         self.layout.clear_widgets()
-        video_player = VideoPlayer(source=video_path, state="play", options={"eos":"pause"})
-        video_player.bind(eos = lambda x : self.show_grid())
+        video_player = VideoPlayer(source=video_path, state="play")
+        video_player.bind(state=self.on_video_end)
         self.layout.add_widget(video_player)
-    def show_grid(self):
-        self.layout.clear_widgets()
-        self.layout.add_widget(Label(text="Grid Screen - Video has ended!"))
-VideoApp().run()
+
+    def on_video_end(self, instance, value):
+        if value == "stop":  # Detect video completion
+            self.manager.current = "grid_screen"
+
+class GridScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        layout = BoxLayout(orientation="vertical")
+        
+        self.video_path = "C:/Users/Adriana/Desktop/grid/WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
+        if not os.path.exists(self.video_path):
+              self.layout.add_widget(Label(text="Background video file not found! Please select a file."))
+        else:
+              self.video_player=VideoPlayer(source=self.video_path, state="play", options={"eos": "pause"})
+              self.video_player.bind(state=self.loop_video)
+              self.layout.add_widget(self.video_player)
+        
+        self.layout.add_widget(Label(text="Welcome to Cosmiccode!",font_size=24))
+        self.layout.add_widget(Label(text="Enter your username and password and let's start a cosmic game!", font_size=15))
+
+        self.layout.add_widget(text="Username")
+        self.username=TextInput(font_size=15)
+        self.layout.add_widget(self.username)
+
+        self.layout.add_widget(text="Your e-mail")
+        self.your_email=TextInput(font_size=15)
+        self.layout.add_widget(self.your_email)
+
+        self.layout.add_widget(text="Password")
+        self.password=TextInput(font_size=15, password=True)
+        self.layout.add_widget(self.password)
+
+        submit_button = Button(text="Create account", on_press=self.submit_username)
+        self.layout.add_widget(submit_button)
+
+        login_button = Button(text="Login",on_press=self.login)
+        self.layout.add_widget(login_button)
+        
+        sign_out_button = Button(text="Sign Out", on_press=self.sign_out)
+        self.layout.add_widget(sign_out_button)
+
+        self.add_widget(self.layout)
+    
+    def submit_username(self, instance):
+        print(f"Username: {self.username.text}, Email: {self.your_email.text}, Password: {self.password.text}")
+
+    def login(self, instance):
+        print("Login action triggered!")
+
+    def sign_out(self, instance):
+        print("Sign Out action triggered!")
+class MyApp(App):
+    def build(self):
+        sm = ScreenManager()
+        sm.add_widget(WelcomeScreen(name="welcome_screen"))
+        sm.add_widget(VideoScreen(name="video_screen"))
+        sm.add_widget(GridScreen(name="grid_screen"))
+        return sm
+
 MyApp().run()
