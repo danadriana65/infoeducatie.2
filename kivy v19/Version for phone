@@ -84,29 +84,34 @@ class VideoScreen(Screen):
 class LoginScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        layout = FloatLayout()
+        self.layout = FloatLayout()
 
-        layout.add_widget(Label(text="Welcome to Cosmiccode!", font_size=24, pos_hint={"center_x": 0.5, "center_y": 0.85}))
+        self.video_path = r"C:\Users\Adriana\infoeducatie.2-3\infoeducatie.2\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
+        if os.path.exists(self.video_path):
+            self.video_player = VideoPlayer(source=self.video_path, play=True, options={"eos": "loop"})
+            self.layout.add_widget(self.video_player)
+
+        self.layout.add_widget(Label(text="Welcome to Cosmiccode!", font_size=24, pos_hint={"center_x": 0.5, "center_y": 0.85}))
 
         self.username = TextInput(hint_text="Username", size_hint=(0.5, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.65})
-        layout.add_widget(self.username)
+        self.layout.add_widget(self.username)
 
         self.email = TextInput(hint_text="Your Email", size_hint=(0.5, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.55})
-        layout.add_widget(self.email)
+        self.layout.add_widget(self.email)
 
         self.password = TextInput(hint_text="Password", password=True, size_hint=(0.5, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.45})
-        layout.add_widget(self.password)
+        self.layout.add_widget(self.password)
 
         self.message_label = Label(text="", pos_hint={"center_x": 0.5, "center_y": 0.35})
-        layout.add_widget(self.message_label)
+        self.layout.add_widget(self.message_label)
 
         submit_button = Button(text="Create Account", size_hint=(0.3, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.25}, on_press=self.submit_username)
-        layout.add_widget(submit_button)
+        self.layout.add_widget(submit_button)
 
         login_button = Button(text="Login", size_hint=(0.3, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.15}, on_press=self.login)
-        layout.add_widget(login_button)
+        self.layout.add_widget(login_button)
 
-        self.add_widget(layout)
+        self.add_widget(self.layout)
 
     def submit_username(self, instance):
         entered_username = self.username.text.strip()
@@ -143,7 +148,7 @@ class GridScreen(Screen):
         self.welcome_label = Label(text="Welcome, User!", font_size=24, pos_hint={"center_x": 0.5, "center_y": 0.85})
         self.layout.add_widget(self.welcome_label)
 
-        sign_out_button = Button(text="Sign Out", size_hint=(0.3, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.15}, on_press=self.sign_out)
+        sign_out_button = Button(text="Continue", size_hint=(0.3, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.15}, on_press=self.sign_out)
         self.layout.add_widget(sign_out_button)
 
         self.add_widget(self.layout)
