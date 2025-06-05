@@ -1,0 +1,53 @@
+from kivy.app import App
+from kivy.uix.videoplayer import VideoPlayer
+from kivy.uix.label import Label
+from kivy.uix.boxlayout import BoxLayout
+import os
+import sys
+from kivy.uix.button import Button
+from kivy.uix.filechooser import FileChooserListView
+from kivy.resources import resource_find
+class MyApp(App):
+    def build(self):
+        layout = BoxLayout()
+        label = Label(text="Welcome to App!", font_size=24)
+        layout.add_widget(label)
+        return layout
+def get_asset_path(filename):
+    """
+    Returns the path of a file, whether the script is run normally or packaged with PyInstaller.
+    Uses Kivy's resource_find() for better asset handling.
+    """
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, filename)
+    
+    # Use Kivy's resource_find() to locate assets properly
+    found_path = resource_find(filename)
+    return found_path if found_path else filename
+class VideoApp(App):
+    def build(self):
+        self.layout = BoxLayout(orientation='vertical')
+        default_video_path = "C:/Users/Adriana/Desktop/grid/WhatsApp Video 2025-03-31 at 12.10.50_af799974.mp4"
+        if not os.path.exists(default_video_path):
+           self.layout.add_widget(Label(text="Default video file not found! Please select a file."))
+           file_chooser= FileChooserListView(filters=["*.mp4"])
+           self.layout.add_widget(file_chooser)
+
+           select_button = Button(text="Select File")
+           select_button.bind(on_press = lambda x : self.play_video(file_chooser.selection))
+           self.layout.add_widget(select_button)
+        else:
+            self.play_video(default_video_path)
+        return self.layout
+    def play_video(self, video_path):
+        if not video_path:
+            return
+        self.layout.clear_widgets()
+        video_player = VideoPlayer(source=video_path, state="play", options={"eos":"pause"})
+        video_player.bind(eos = lambda x : self.show_grid())
+        self.layout.add_widget(video_player)
+    def show_grid(self):
+        self.layout.clear_widgets()
+        self.layout.add_widget(Label(text="Grid Screen - Video has ended!"))
+VideoApp().run()
+MyApp().run()
