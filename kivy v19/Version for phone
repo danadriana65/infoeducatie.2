@@ -1,10 +1,13 @@
 import kivy
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.videoplayer import VideoPlayer
+from kivy.uix.video import Video
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.popup import Popup
 import os
 import sys
 import json
@@ -130,7 +133,7 @@ class LoginScreen(Screen):
 
         if verify_user(entered_username, entered_password):
             self.manager.get_screen("grid_screen").set_user_details(entered_username)  # Pass user data
-            self.manager.current = "grid_screen"
+            self.manager.current = "main"
         else:
             self.message_label.text = "Invalid credentials!"
 class GridScreen(Screen):
@@ -158,6 +161,32 @@ class GridScreen(Screen):
 
     def sign_out(self, instance):
         self.manager.current = "login_screen"
+class MainScreen(Screen):
+    def __init__(self,**kwargs):
+     super().__init__(**kwargs)
+     layout = BoxLayout(orientation = "vertical")
+     video_path = "C:\\Users\\Adriana\\Desktop\\grid\\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
+     if os.path.exists(video_path):
+         video = Video(source=video_path,play=True, allow_stretch=True)
+         layout.add_widget(video)
+     options_layout=BoxLayout(orientation = "horizontal")
+     languages = [("C++", "C:\\Users\\Adriana\\Desktop\\grid\\ISO_C++_Logo.svg(1).png"), 
+                     ("Python", "C:\\Users\\Adriana\\Desktop\\grid\\Python.svg(1).png"),
+                     ("JavaScript", "C:\\Users\\Adriana\\Desktop\\grid\\1698604163003(1).png")]
+     for lang, sticker in languages:
+         btn = Button(text=lang, size_hint=(None, None), width=250, height=50)
+         img = Image(source=sticker, size_hint=(None, None), width=50, height=50)
+
+         options_layout.add_widget(btn)
+         options_layout.add_widget(img)
+     undo_button = Button(text="Undo", size_hint=(0.3, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.15}, on_press=self.undo)
+     layout.add_widget(undo_button)
+
+     layout.add_widget(options_layout)
+     self.add_widget(layout)
+    
+    def undo(self, instance):
+         self.manager.current="login_screen"
 class MyApp(App):
     def build(self):
         sm = ScreenManager()
@@ -165,6 +194,7 @@ class MyApp(App):
         sm.add_widget(VideoScreen(name="video_screen"))
         sm.add_widget(GridScreen(name="grid_screen"))
         sm.add_widget(LoginScreen(name="login_screen"))
+        sm.add_widget(MainScreen(name="main"))
         return sm
 
 MyApp().run()
