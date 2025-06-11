@@ -8,6 +8,7 @@ from kivy.uix.videoplayer import VideoPlayer
 from kivy.uix.video import Video
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
+import webbrowser
 from kivy.uix.popup import Popup
 import os
 import sys
@@ -253,6 +254,55 @@ class SettingsScreen(Screen):
         self.profile_label.text = "No profile picture selected"
         if os.path.exists("circular_profile.png"):
             os.remove("circular_picture.png")
+class NavigateScreen(Screen):
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+        self.option = option
+        layout = BoxLayout(orientation = "vertical")
+
+        video_path = "C:/Users/Adriana/Desktop/grid/WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
+        if os.path.exists(video_path):
+            self.video_player = Video(source = video_path, state="play", options = {"eos":"loop"}, allow_fullscreen = True)
+            layout.add_widget(self.video_player)
+
+            top_buttons = BoxLayout(size_hint=(1, 0.1))
+            progress_btn = Button(text = "Progress", size_hint=(None, None), width =150, height=50)
+            leaderboard_btn = Button(text = "LeaderBoard", size_hint=(None, None), width=150, height=50)
+            profile_btn = Button(text= "Profile", size_hint=(None, None), width=150, height=50)
+            top_buttons.add_widget(progress_btn)
+            top_buttons.add_widget(leaderboard_btn)
+            top_buttons.add_widget(profile_btn)
+
+            layout.add_widget(top_buttons)
+
+            link_map= {
+                "C++": "https://www.w3schools.com/cpp/cpp_syntax.asp",
+                "Python": "https://www.w3schools.com/python/default.asp",
+                "JavaScript": "https://www.w3schools.com/js/default.asp"
+            }
+            if self.option in link_map:
+                theory_btn = Button(text=f"Teorie {self.option}", size_hint=(None, None), width=200, height=50)
+                theory_btn.bind(on_press = lambda x: webbrowser.open(link_map[self.option]))
+                layout.add_widget(theory_btn)
+            planet_images = {
+            "Uranus": "C:/Users/Adriana/infoeducatie.2-2/Uranus(1).png",
+            "Venus": "C:/Users/Adriana/infoeducatie.2-2/Venus.png",
+            "Saturn": "C:/Users/Adriana/infoeducatie.2-2/Saturn.png"
+            }
+            planet_buttons = BoxLayout(size_hint=(1,0.3))
+            for planet_name, image_path in planet_images.items():
+                if os.path.exists(image_path):
+                    img = Image(source = image_path, size_hint=(None, None), width=100, height=100)
+                    btn = Button(text=planet_name, size_hint=(None, None), width=100, height=100)
+                    planet_buttons.add_widget(img)
+                    planet_buttons.add_widget(btn)
+            
+            layout.add_widget(planet_buttons)
+
+            undo_button = Button(text="Undo", size_hint=(None, None), width=200, height=50)
+            layout.add_widget(undo_button)
+            self.add_widget(layout)
+
 class MyApp(App):
     def build(self):
         sm = ScreenManager()
@@ -262,6 +312,9 @@ class MyApp(App):
         sm.add_widget(LoginScreen(name="login_screen"))
         sm.add_widget(MainScreen(name="main"))
         sm.add_widget(SettingsScreen(name="settings_screen"))
+        sm.add_widget(NavigateScreen("Python", name="navigate_screen"))
+        sm.add_widget(NavigateScreen("C++", name="navigate_screen"))
+        sm.add_widget(NavigateScreen("JavaScript", name="navigate_screen"))
         return sm
 
 MyApp().run()
