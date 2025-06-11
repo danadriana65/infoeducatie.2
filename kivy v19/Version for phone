@@ -179,7 +179,7 @@ class MainScreen(Screen):
      for lang, sticker in languages:
          btn = Button(text=lang, size_hint=(None, None), width=250, height=50)
          img = Image(source=sticker, size_hint=(None, None), width=50, height=50)
-
+         btn.bind(on_press=lambda instance, language=lang: self.switch_to_navigate(language))
          options_layout.add_widget(btn)
          options_layout.add_widget(img)
      undo_button = Button(text="Undo", size_hint=(0.3, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.15}, on_press=self.undo)
@@ -188,6 +188,10 @@ class MainScreen(Screen):
      layout.add_widget(setting_button)
      layout.add_widget(options_layout)
      self.add_widget(layout)
+    def switch_to_navigate(self, option):
+       self.manager.add_widget(NavigateScreen(option, name=f"navigate_screen_{option}"))
+       self.manager.current = f"navigate_screen_{option}"
+
     def settings(self,instance):
         self.manager.current="settings_screen"
     def undo(self, instance):
@@ -255,14 +259,14 @@ class SettingsScreen(Screen):
         if os.path.exists("circular_profile.png"):
             os.remove("circular_picture.png")
 class NavigateScreen(Screen):
-    def __init__(self,**kwargs):
+    def __init__(self,option,**kwargs):
         super().__init__(**kwargs)
         self.option = option
         layout = BoxLayout(orientation = "vertical")
 
         video_path = "C:/Users/Adriana/Desktop/grid/WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
         if os.path.exists(video_path):
-            self.video_player = Video(source = video_path, state="play", options = {"eos":"loop"}, allow_fullscreen = True)
+            self.video_player = Video(source = video_path, state="play", options = {"eos":"loop"})
             layout.add_widget(self.video_player)
 
             top_buttons = BoxLayout(size_hint=(1, 0.1))
@@ -282,7 +286,7 @@ class NavigateScreen(Screen):
             }
             if self.option in link_map:
                 theory_btn = Button(text=f"Teorie {self.option}", size_hint=(None, None), width=200, height=50)
-                theory_btn.bind(on_press = lambda x: webbrowser.open(link_map[self.option]))
+                theory_btn.bind(on_press=lambda instance: webbrowser.open(link_map[self.option]))
                 layout.add_widget(theory_btn)
             planet_images = {
             "Uranus": "C:/Users/Adriana/infoeducatie.2-2/Uranus(1).png",
@@ -294,14 +298,21 @@ class NavigateScreen(Screen):
                 if os.path.exists(image_path):
                     img = Image(source = image_path, size_hint=(None, None), width=100, height=100)
                     btn = Button(text=planet_name, size_hint=(None, None), width=100, height=100)
+                    btn.bind(on_press=lambda instance, name=planet_name: self.switch_to_navigate(name))
                     planet_buttons.add_widget(img)
                     planet_buttons.add_widget(btn)
             
             layout.add_widget(planet_buttons)
 
             undo_button = Button(text="Undo", size_hint=(None, None), width=200, height=50)
+            undo_button.bind(on_press=lambda instance: setattr(self.manager, "current", "main_screen"))
             layout.add_widget(undo_button)
+
             self.add_widget(layout)
+            
+    def switch_to_navigate(self, option):
+        self.manager.add_widget(NavigateScreen(option, name="navigate_screen"))
+        self.manager.current = "navigate_screen"
 
 class MyApp(App):
     def build(self):
