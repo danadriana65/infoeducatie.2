@@ -13,6 +13,10 @@ from kivy.uix.popup import Popup
 import os
 import sys
 import json
+from kivy.clock import Clock
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.scrollview import ScrollView
+from kivy.core.window import Window
 from kivy.uix.textinput import TextInput
 from kivy.uix.filechooser import FileChooserListView
 from kivy.uix.floatlayout import FloatLayout
@@ -191,35 +195,30 @@ class MainScreen(Screen):
     def switch_to_navigate(self, option):
        self.manager.add_widget(NavigateScreen(option, name=f"navigate_screen_{option}"))
        self.manager.current = f"navigate_screen_{option}"
-
     def settings(self,instance):
         self.manager.current="settings_screen"
     def undo(self, instance):
          self.manager.current="login_screen"
-
-def save_user_data(self, data):
-        """ Save user data to JSON file. """
-        with open(self.file_path, "w") as f:
-            json.dump(data, f)
-
 class UserDataManager:
     def __init__(self, file_path="user_data.json"):
         self.file_path = file_path
 
     def load_user_data(self):
-        """ Load user data from JSON file. """
         if os.path.exists(self.file_path):
             with open(self.file_path, "r") as f:
                 return json.load(f)
         return {}
 
-# Initialize user data manager
+    def save_user_data(self, data):
+        with open(self.file_path, "w") as f:
+            json.dump(data, f, indent=4)
 user_data_manager = UserDataManager()
 class SettingsScreen(Screen):
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
         self.layout = BoxLayout(orientation="vertical", padding=20, spacing=10)
-        
+        self.add_widget(self.layout)  # Asta trebuie să fie la finalul __init__()
+
         user_data = user_data_manager.load_user_data() 
 
         title_label = Label(text="Settings", font_size=24)
@@ -258,6 +257,7 @@ class SettingsScreen(Screen):
         self.profile_label.text = "No profile picture selected"
         if os.path.exists("circular_profile.png"):
             os.remove("circular_picture.png")
+            self.add_widget(self.layout)
 class NavigateScreen(Screen):
     def __init__(self,option,**kwargs):
         super().__init__(**kwargs)
@@ -310,9 +310,138 @@ class NavigateScreen(Screen):
 
             self.add_widget(layout)
             
-    def switch_to_navigate(self, option):
-        self.manager.add_widget(NavigateScreen(option, name="navigate_screen"))
-        self.manager.current = "navigate_screen"
+    def switch_to_navigate(self, planet_name):
+      screen_name = f"options_screen_{planet_name}_{self.option}"
+      if not self.manager.has_screen(screen_name):
+        self.manager.add_widget(OptionsScreen(planet_name, self.option, name=screen_name))
+        self.manager.current = screen_name
+
+class OptionsScreen(Screen):
+    def __init__(self, planet_name, selected_option, **kwargs):
+        super().__init__(**kwargs)
+        self.planet_name = planet_name
+        self.selected_option = selected_option
+
+        main_layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
+
+        title = Label(text=f"Options for {planet_name}", font_size=24, size_hint=(1, None), height=60)
+        main_layout.add_widget(title)
+
+        # Scrollable grid for exercise buttons
+        scroll = ScrollView(size_hint=(1, 1))
+        grid = GridLayout(cols=2, spacing=10, size_hint_y=None)
+        grid.bind(minimum_height=grid.setter('height'))
+
+        for i in range(7):
+            btn_text = f"Exercițiu {i + 1}"
+            btn = Button(text=btn_text, size_hint_y=None, height=80)
+
+            # Assign button logic based on planet and option
+            btn.bind(on_press=lambda instance, index=i: self.handle_exercise(index))
+            grid.add_widget(btn)
+
+        scroll.add_widget(grid)
+        main_layout.add_widget(scroll)
+
+        # Undo button
+        undo = Button(text="Undo", size_hint=(None, None), size=(200, 50))
+        undo.bind(on_press=lambda x: setattr(self.manager, "current", "navigate_screen_" + self.selected_option))
+        main_layout.add_widget(undo)
+
+        self.add_widget(main_layout)
+
+    def handle_exercise(self, i):
+        print(f"Exercițiu {i + 1} selectat pentru {self.planet_name} - {self.selected_option}")
+        if self.planet_name == "Saturn" and self.selected_option == "C++":
+            question = questions_cpp1[i]
+            code = code_cpp1[i]
+            answers = answers_cpp1[i]
+questions_cpp1 = [
+    "Unde este eroarea?",
+    "Unde este eroarea?",
+    "Unde este eroarea?",
+    "Unde este eroarea?",
+    "Unde este eroarea?",
+    "Unde este eroarea?",
+    "Unde este eroarea? "
+]
+
+# Vectorul de cod Python asociat fiecărei întrebări
+code_cpp1 = [
+    "#include <iostream> \nusing namespace std; \nint main() { \nint *ptr; \n*ptr = 10; \ncout << *ptr << endl; \nreturn 0;}",
+    "#include <iostream> \nusing namespace std; \nint main() { \nint matrice[3][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}; \ncout << matrice[3][0] << endl; \n return 0;}",
+    '#include <iostream> \nusing namespace std; \nint main() { \nstring mesaj = "Salut!"; \ncout << mesaj; \nreturn 0;}',
+    "#include <iostream> \nusing namespace std; \nint main() { \nint v[5] = {1, 2, 3, 4, 5}; \ncout << v[5] << endl; \n return 0;}",
+    '#include <iostream> \n#include <cstring> \n using namespace std; \nint main() { \nchar sir[6] = "Salut"; \nstrcat(sir, "!"); \ncout << sir << endl; \nreturn 0;}',
+    "#include <iostream> \n #include <stack>\n using namespace std;\n int main() {\nstack<int> s; \n s.pop(); \n return 0;",
+    "#include <iostream> \n #include <queue> \n using namespace std; \nint main() {\n queue<int> q; \nq.push(10);\n q.push(20);\n q.push(30);\n cout << q.back() << endl;\n q.pop();\n cout << q.front() << endl;\n q.pop();q.pop();\n cout << q.front() << endl;\nreturn 0;}"
+]
+answers_cpp1 = [
+    ["Linia 5", "Linia 2", "Linia 3", "Nicio eroare"],
+    ["Linia 4", "Linia 5", "Linia 3", "Nicio eroare"],
+    ["Linia 1", "Linia 2", "Linia 3", "E bun, dar poate fi imbunatatit"],
+    ["Linia 2", "Linia 5", "Linia 8", "Nicio eroare"],
+    ["Linia 6", "Linia 2", "Linia 8", "Nicio eroare"],
+    ["Linia 5", "Linia 2", "Linia 6", "Nicio eroare"],
+    ["Linia 14", "Linia 2", "Linia 9", "Nicio eroare"]
+]
+user_progress = {}
+
+class VideoScreen(Screen):
+    def __init__(self, video_path, callback, planet_name, selected_option, **kwargs):
+        super().__init__(**kwargs)
+        self.video_path = video_path
+        self.callback = callback
+        self.planet_name = planet_name
+        self.selected_option = selected_option
+
+        self.layout = BoxLayout(orientation='vertical')
+        self.video = Video(source=self.video_path)
+        self.video.bind(on_eos=self.video_ended)
+        self.layout.add_widget(self.video)
+        self.add_widget(self.layout)
+
+        Clock.schedule_once(lambda dt: self.video.state = 'play', 1)
+
+    def video_ended(self, instance):
+        self.manager.transition.direction = 'right'
+        self.manager.current = 'question'
+        self.callback(self.planet_name, self.selected_option)
+
+class QuestionScreen(Screen):
+    def __init__(self, question_data, **kwargs):
+        super().__init__(**kwargs)
+        self.question_data = question_data
+        self.layout = BoxLayout(orientation='vertical')
+        self.label = Label(text=question_data['question'], font_size=24, size_hint_y=0.2)
+        self.layout.add_widget(self.label)
+
+        for answer in question_data['answers']:
+            btn = Button(text=answer, on_press=lambda btn_instance, a=answer: self.check_answer(btn_instance, a))
+            self.layout.add_widget(btn)
+
+        self.add_widget(self.layout)
+
+    def check_answer(self, button, selected):
+        planet = self.question_data['planet']
+        option = self.question_data['option']
+        correct = self.question_data['correct']
+
+        if selected == correct:
+            button.background_color = (0, 1, 0, 1)
+            user_progress.setdefault(option, {}).setdefault(planet, 0)
+            user_progress[option][planet] += 1
+            video_path = 'correct_video.mp4'
+        else:
+            button.background_color = (1, 0, 0, 1)
+            video_path = 'incorrect_video.mp4'
+
+        save_progress()
+        self.manager.add_widget(VideoScreen(video_path, self.manager.get_screen('question').__init__, planet, option, name='video'))
+        self.manager.current = 'video'
+
+def save_progress():
+    print("Progress saved:", user_progress)
 
 class MyApp(App):
     def build(self):
@@ -326,6 +455,7 @@ class MyApp(App):
         sm.add_widget(NavigateScreen("Python", name="navigate_screen"))
         sm.add_widget(NavigateScreen("C++", name="navigate_screen"))
         sm.add_widget(NavigateScreen("JavaScript", name="navigate_screen"))
+        
         return sm
 
 MyApp().run()
