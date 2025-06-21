@@ -271,6 +271,7 @@ class NavigateScreen(Screen):
 
             top_buttons = BoxLayout(size_hint=(1, 0.1))
             progress_btn = Button(text = "Progress", size_hint=(None, None), width =150, height=50)
+            progress_btn.bind(on_press=lambda x: show_progress_kivy())
             leaderboard_btn = Button(text = "LeaderBoard", size_hint=(None, None), width=150, height=50)
             profile_btn = Button(text= "Profile", size_hint=(None, None), width=150, height=50)
             top_buttons.add_widget(progress_btn)
@@ -352,24 +353,56 @@ class OptionsScreen(Screen):
 
     def handle_exercise(self, i):
       print(f"Exercițiu {i + 1} selectat pentru {self.planet_name} - {self.selected_option}")
-    
+      question = ""
+      code = ""
+      answers = []
+      correct = ""
       if self.planet_name == "Saturn" and self.selected_option == "C++":
         question = questions_cpp1[i]
         code = code_cpp1[i]
         answers = answers_cpp1[i]
         correct = answers[0]  
-      if self.planet_name == "Saturn" and self.selected_option == "Python":
+      elif self.planet_name == "Uranus" and self.selected_option == "C++":
+          question = questions_cpp[i]
+          answers = answers_cpp[i]
+          correct = correct_answers_cpp[0]
+      elif self.planet_name == "Venus" and self.selected_option == "C++":
+          question = questions_cpp_code[i]
+          answers = answers_cpp_code[i]
+          correct = correct_answers_cpp[0]
+      elif self.planet_name == "Uranus" and self.selected_option == "Python":
+          question = questions[i]
+          answers = answers[i]
+          correct = correct_answers[0]
+      elif self.planet_name == "Venus" and self.selected_option == "Python":
+          question = questions_python_b[i]
+          answers = answers_python_b[i]
+          correct = correct_answers_python_b[0]
+      elif self.planet_name == "Saturn" and self.selected_option == "Python":
         question = questions_python_c[i]
         code = code_samples_python_c[i]
         answers = answers_python_c[i]
         correct = correct_answers_python_c[0]  
-      if self.planet_name == "Saturn" and self.selected_option == "JavaScript":
+      elif self.planet_name == "Uranus" and self.selected_option == "JavaScript":
+          question = questions_javascript_a[i]
+          answers = answers_javascript_a[i]
+          correct = correct_answers_javascript_a[0]
+      elif self.planet_name == "Venus" and self.selected_option == "JavaScript":
+          question = questions_javascript_code[i]
+          answers = answers_javascript_code[i]
+          correct = correct_answers_javascript_code[0]
+      elif self.planet_name == "Saturn" and self.selected_option == "JavaScript":
         question = questions_javascript_error[i]
         code = code_samples_javascript_error[i]
         answers = answers_javascript_error[i]
         correct = correct_answers_javascript_error[0]
-        question_data = {
-            'question': question + "\n\n" + code,
+      else:
+        print("❌ Nicio întrebare disponibilă pentru combinația selectată.")
+        return
+
+      full_question = question + ("\n\n" + code if code else "")
+      question_data = {
+            'question': full_question,
             'answers': answers,
             'correct': correct,
             'planet': self.planet_name,
@@ -377,9 +410,169 @@ class OptionsScreen(Screen):
         }
 
         # Create and switch to the question screen
-        question_screen = QuestionScreen(question_data, name='question')
-        self.manager.add_widget(question_screen)
-        self.manager.current = 'question'
+      question_screen = QuestionScreen(question_data, name='question')
+      self.manager.add_widget(question_screen)
+      self.manager.current = 'question'
+questions_javascript_code = [
+    "Cum declarăm o funcție anonimă în JavaScript?",
+    "Care este sintaxa corectă pentru Arrow Function?",
+    "Cum definim un obiect JavaScript?",
+    "Care este modul corect de a itera printr-o listă cu `forEach`?",
+    "Cum verificăm dacă un element există într-un array?",
+    "Cum facem destructurarea unui obiect?",
+    "Cum adăugăm un nou element într-un array?"
+]
+
+answers_javascript_code = [
+    ["let func = function() {}", "let func() {}", "function = func() {}"],
+    ["const add = (a, b) => a + b;", "add = (a, b) { return a + b; }", "function add(a, b) => a + b;"],
+    ["let obj = object { name: 'Alex', age: 25 };", "object obj = { 'name': 'Alex', 'age': 25 }", "const obj = { name: 'Alex', age: 25 }"],
+    ["array.forEach(item => console.log(item));", "for (item in array) { console.log(item); }", "array.each(item => console.log(item));"],
+    ["array.has(5)", "array.includes(5)", "array.exists(5)"],
+    ["const { name, age } = obj;", "destructure(obj).get('name', 'age');", "let name, age = obj.extract();"],
+    ["array.add('newItem')", "array.push('newItem')", "array.insert('newItem')"]
+]
+
+correct_answers_javascript_code = [
+    "let func = function() {}",
+    "const add = (a, b) => a + b;",
+    "const obj = { name: 'Alex', age: 25 }",
+    "array.forEach(item => console.log(item));",
+    "array.includes(5)",
+    "const { name, age } = obj;",
+    "array.push('newItem')"
+]
+questions_javascript_a = [
+    "Cum declarăm o variabilă în JavaScript?",
+    "Care dintre următoarele NU este un mod valid de a declara o funcție?",
+    "Cum verificăm tipul unei variabile în JavaScript?",
+    "Ce va afișa `console.log(2 + '2')`?",
+    "Care dintre următoarele structuri de date NU există în JavaScript?",
+    "Cum iterăm peste un array folosind `map()`?",
+    "Cum facem o copie superficială a unui obiect în JavaScript?"
+]
+
+answers_javascript_a = [
+    ["var x = 10;", "let x = 10;", "const x = 10;", "int x = 10;"],
+    ["function myFunc() {}", "const myFunc = function() {}", "myFunc = () => {}", "def myFunc() {}"],
+    ["typeof x", "x.type()", "getType(x)", "x.kind"],
+    ["22", "'22'", "4", "Error"],
+    ["Array", "Set", "Tuple", "Map"],
+    ["array.map(x => x * 2)", "map(array, x => x * 2)", "array.map(function(x) { return x * 2 })", "array.forEach(x => x * 2)"],
+    ["Object.assign({}, obj)", "obj.copy()", "{...obj}", "clone(obj)"]
+]
+
+correct_answers_javascript_a = [
+    "int x = 10;",  # Varianta greșită (to test knowledge)
+    "def myFunc() {}",  # Varianta greșită (nu există în JS)
+    "typeof x",
+    "'22'",
+    "Tuple",
+    "array.map(x => x * 2)",
+    "{...obj}"
+]
+questions_python_b = [
+    "Cum declari o funcție în Python?",
+    "Cum citești un fișier în Python?",
+    "Cum iterăm peste o listă folosind list comprehension?",
+    "Cum creezi o clasă în Python?",
+    "Cum verifici dacă un element există într-un dicționar?",
+    "Cum folosești `try-except` pentru gestionarea erorilor?",
+    "Cum sortezi o listă în Python?"
+]
+
+answers_python_b = [
+    ["def my_function():\n    print('Hello!')", "function my_function():\n    print('Hello!')", "def myFunction() print('Hello!')", "fun my_function():\n    print('Hello!')"],
+    ["with open('file.txt', 'r') as f:\n    data = f.read()", "file = open('file.txt', 'r')\n    file.read()", "open('file.txt', 'read')", "readfile('file.txt')"],
+    ["[x**2 for x in range(10)]", "for x in range(10):\n    x**2", "[for x in range(10): x**2]", "map(lambda x: x**2, range(10))"],
+    ["class MyClass:\n    def __init__(self):\n        self.name = 'Example'", "def MyClass:\n    self.name = 'Example'", "new Class MyClass:\n    name = 'Example'", "class = MyClass()"],
+    ["if 'key' in my_dict:", "my_dict.has_key('key')", "my_dict.contains('key')", "my_dict.find('key')"],
+    ["try:\n    x = int(input('Număr:'))\nexcept ValueError:\n    print('Eroare!')", "try x = int(input('Număr')) except ValueError: print('Eroare!')", "except ValueError:\n    x = int(input('Număr'))", "catch ValueError:\n    x = int(input('Număr'))"],
+    ["sorted(my_list)", "my_list.sort()", "sort(my_list)", "my_list.sorted()"]
+]
+
+correct_answers_python_b = [
+    "def my_function():\n    print('Hello!')",
+    "with open('file.txt', 'r') as f:\n    data = f.read()",
+    "[x**2 for x in range(10)]",
+    "class MyClass:\n    def __init__(self):\n        self.name = 'Example'",
+    "if 'key' in my_dict:",
+    "try:\n    x = int(input('Număr:'))\nexcept ValueError:\n    print('Eroare!')",
+    "sorted(my_list)"
+]
+questions = [
+    "Ce este metoda __new__() în Python?",
+    "Ce face @staticmethod în Python?",
+    "Care este diferența dintre deepcopy() și copy()?",
+    "Ce va returna list(map(lambda x: x**2, range(3)))?",
+    'Ce face expresia if __name__ == "__main__": în Python?',
+    "Care dintre următoarele NU este o metodă validă pentru sincronizarea thread-urilor în Python?",
+    "Ce rezultat va avea print(bool([]) == False)?" ]
+  
+
+answers = [
+    ["O metodă care creează o instanță înainte de __init__()", "O metodă folosită doar în moștenirea multiplă", "O metodă specială care returnează self", "O metodă de conversie între tipuri de date"],
+    ["Creează o metodă care poate fi apelată doar de alte clase", "Definește o metodă statică care nu are acces la self", "Permite accesul la metodele private din clasă", "Transformă metoda într-o variabilă de clasă"],
+    ["deepcopy() face conversia tipurilor de date", "copy() elimină referințele către obiectele originale", "deepcopy() este mai rapid decât copy()", "copy() creează o copie superficială, iar deepcopy() copiază recursiv obiectele"],
+    ["[1, 4, 9]", "[0, 2, 4]", "[0, 1, 4]", "[1, 2, 3]"],
+    ["Creează o variabilă globală numită __main__", "Permite executarea în paralel a mai multor funcții", "Determină dacă scriptul este executat direct", "Verifică dacă scriptul este importat din alt modul"],
+    ["threading.Event()", "threading.pause()", "threading.Lock()", "threading.Semaphore()"],
+    ["True", "False", "Va genera o eroare", "None"]
+]
+
+correct_answers = ["O metodă care creează o instanță înainte de __init__()", "Definește o metodă statică care nu are acces la self", "copy() creează o copie superficială, iar deepcopy() copiază recursiv obiectele", "[0, 1, 4]", "Determină dacă scriptul este executat direct", "threading.pause()", "True"]
+questions_cpp = [
+    "Care dintre următoarele este un mod corect de a declara o variabilă în C++?",
+    "Ce cuvânt-cheie folosim pentru a aloca dinamic memorie în C++?",
+    "Ce tip de date folosim pentru a stoca un singur caracter în C++?",
+    "Care dintre următoarele bucle NU există în C++?",
+    "Care dintre următoarele operatori este folosit pentru accesarea membrilor unei structuri sau clase?",
+    "Care este scopul funcției `main()` în C++?",
+    "Ce se întâmplă când apelăm `delete` pe un pointer valid?"
+]
+
+answers_cpp = [
+    ["int x;", "variable x;", "x = 5;", "declare x;"],
+    ["alloc", "new", "malloc", "allocate"],
+    ["char", "string", "character", "text"],
+    ["for", "while", "repeat-until", "do-while"],
+    [".", "->", "*", "&"],
+    ["Inițializarea tuturor variabilelor", "Stabilirea punctului de intrare al programului", "Afișarea rezultatelor", "Crearea de obiecte"],
+    ["Memoria asociată cu pointerul este eliberată", "Pointerul se șterge automat din cod", "Programul se oprește imediat", "Pointerul este resetat la zero"]
+]
+
+correct_answers_cpp = [
+    "int x;", "new", "char", "repeat-until", ".", "Stabilirea punctului de intrare al programului", "Memoria asociată cu pointerul este eliberată"
+]
+questions_cpp_code = [
+    "Care dintre următoarele declară corect o funcție în C++?",
+    "Care dintre următoarele este sintaxa corectă pentru un `for loop`?",
+    "Care este modul corect de a accesa un element dintr-un vector?",
+    "Care dintre următoarele alocă corect memorie dinamică?",
+    "Care dintre următoarele clase implementează corect moștenirea?",
+    "Care este forma corectă de a citi un număr de la tastatură?",
+    "Care dintre următoarele definește corect un destructor?"
+]
+
+answers_cpp_code = [
+    ["function myFunction();", "void myFunction();", "func myFunction();"],
+    ["for (i = 0; i < n; i++)", "for i in range(0, n)", "loop (i; i < n; i++)"],
+    ["vector[2]", "vector(2)", "vector -> 2"],
+    ["alloc<int> ptr;", "int ptr = malloc(sizeof(int));", "int *ptr = new int;"],
+    ["class Child : Parent {}", "class Parent -> Child {}", "inherit Parent -> Child {}"],
+    ["cin >> x;", "input(x);", "x = scan();"],
+    ["~MyClass() {}", "destructor MyClass() {}", "destroy MyClass();"]
+]
+
+correct_answers_cpp_code = [
+    "void myFunction();",
+    "for (i = 0; i < n; i++)",
+    "vector[2]",
+    "int *ptr = new int;",
+    "class Child : Parent {}",
+    "cin >> x;",
+    "~MyClass() {}"
+]
 
 questions_cpp1 = [
     "Unde este eroarea?",
@@ -510,6 +703,7 @@ class Video2Screen(Screen):
         self.manager.remove_widget(self)  # Elimină doar Video2Screen
 
 # Screen to display the question and handle answers
+user_progress ={}
 class QuestionScreen(Screen):
     def __init__(self, question_data, **kwargs):
         super().__init__(**kwargs)
@@ -559,8 +753,35 @@ class QuestionScreen(Screen):
 
 
 def save_progress():
+    global user_progress
     print("Progres salvat:", user_progress)
+def show_progress_kivy():
+    global user_progress
+    progress_message = "Progresul tău:\n"
+    for option, planets in user_progress.items():
+        progress_message += f"\n{option}:\n"
+        for planet, correct_count in planets.items():
+            progress_message += f"  {planet}: {correct_count} întrebări corecte\n"
 
+    # Conținutul popupului
+    content = BoxLayout(orientation='vertical', padding=20, spacing=10)
+    label = Label(text=progress_message, halign="left", valign="top", color=(1, 1, 1, 1))
+    label.bind(size=label.setter('text_size'))  # pentru wrap la text
+
+    close_button = Button(text="Închide", size_hint=(1, None), height=40)
+    content.add_widget(label)
+    content.add_widget(close_button)
+
+    # Popup-ul propriu-zis
+    popup = Popup(title="Progres",
+                  content=content,
+                  size_hint=(0.8, 0.8),
+                  background_color=(0, 0.137, 0.4, 1),  # echivalentul "#002366"
+                  title_color=(1, 1, 1, 1),
+                  auto_dismiss=False)
+
+    close_button.bind(on_release=popup.dismiss)
+    popup.open()
 class MyApp(App):
     def build(self):
         sm = ScreenManager(transition=FadeTransition())
