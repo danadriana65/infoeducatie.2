@@ -1,4 +1,5 @@
 import kivy
+from session import UserSession
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from PIL import Image as PILImage, ImageDraw
@@ -35,7 +36,7 @@ def store_user_info(username, password, email):
     if username in user_data:
         return "User already exists"
     else:
-        user_data[username] = {"username": username, "password": password, "email": email}  # ✅ Ensure 'username' is included
+        user_data[username] = {"username": username, "password": password, "email": email}  
         with open("user_credentials.json", "w") as f:
             json.dump(user_data, f, indent=4)
         return "Account created successfully"
@@ -124,6 +125,11 @@ class LoginScreen(Screen):
         self.layout.add_widget(login_button)
 
         self.add_widget(self.layout)
+        App.get_running_app().session.set_profile(
+    username=self.username.text.strip(),
+    email=self.email.text.strip(),
+    image_path=""
+)
 
     def submit_username(self, instance):
         entered_username = self.username.text.strip()
@@ -145,6 +151,7 @@ class LoginScreen(Screen):
             self.manager.current = "main"
         else:
             self.message_label.text = "Invalid credentials!"
+    
 class GridScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -164,7 +171,20 @@ class GridScreen(Screen):
         self.layout.add_widget(sign_out_button)
 
         self.add_widget(self.layout)
+    def switch_to_navigate(self, option):
+      app = App.get_running_app()
+      screen_name = f"navigate_screen_{option}"
 
+      if not self.manager.has_screen(screen_name):
+        self.manager.add_widget(NavigateScreen(
+            option,
+            app.session.user_data,
+            app.session.username,
+            app.session.email,
+            name=screen_name
+        ))
+
+      self.manager.current = screen_name
     def set_user_details(self, username):
         self.welcome_label.text = f"Welcome, {username}!"
 
@@ -195,8 +215,19 @@ class MainScreen(Screen):
      layout.add_widget(options_layout)
      self.add_widget(layout)
     def switch_to_navigate(self, option):
-       self.manager.add_widget(NavigateScreen(option, name=f"navigate_screen_{option}"))
-       self.manager.current = f"navigate_screen_{option}"
+       app = App.get_running_app()
+       screen_name = f"navigate_screen_{option}"
+
+       if not self.manager.has_screen(screen_name):
+        self.manager.add_widget(NavigateScreen(
+            option,
+            {"profile_picture": app.session.profile_picture},
+            app.session.username,
+            app.session.email,
+            name=screen_name
+        ))
+
+        self.manager.current = screen_name
     def settings(self,instance):
         self.manager.current="settings_screen"
     def undo(self, instance):
@@ -216,59 +247,93 @@ class UserDataManager:
             json.dump(data, f, indent=4)
 user_data_manager = UserDataManager()
 class SettingsScreen(Screen):
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.layout = BoxLayout(orientation="vertical", padding=20, spacing=10)
-        self.add_widget(self.layout)  # Asta trebuie să fie la finalul __init__()
+        self.add_widget(self.layout)
 
-        user_data = user_data_manager.load_user_data() 
+        # Accesăm datele din sesiune
+        session = App.get_running_app().session
 
-        title_label = Label(text="Settings", font_size=24)
-        self.layout.add_widget(title_label)
-        username_label = Label(text=f"Username: {user_data.get('username', 'Unknown')}", font_size=18)
-        self.layout.add_widget(username_label)
-        email_label = Label(text=f"Email: {user_data.get('email', 'Unknown')}", font_size=18)
-        self.layout.add_widget(email_label)
-        self.profile_label = Label(text="No profile picture selected")  # ✅ Correct
+        self.profile_label = Label(text="No profile picture selected")
+        self.layout.add_widget(Label(text="Settings", font_size=24))
+        self.layout.add_widget(Label(text=f"Username: {session.username}", font_size=18))
+        self.layout.add_widget(Label(text=f"Email: {session.email}", font_size=18))
         self.layout.add_widget(self.profile_label)
-        if "profile_picture" in user_data and os.path.exists(user_data["profile_picture"]):
-            try:
-                profile_picture = PILImage.open(user_data["profile_picture"]).convert("RGBA")
-                mask = PILImage.new("L",profile_picture.size, 0)
-                draw = ImageDraw.Draw(mask)
-                draw.ellipse((0,0,profile_picture.size[0] ,profile_picture[1]),fill=255)
-                circular_profile= PILImage.new("RGBA", profile_picture.size)
-                circular_profile.paste(profile_picture, (0, 0), mask)
-                circular_profile=circular_profile.resize((100,100))
-                circular_profile.save("circular_profile.png")
 
-                self.profile_img = Image(source="circular_profile.png",size_hint=(None,None), width=100, height=100)
-                self.layout.add_widget(self.profile_img)
-            except Exception as e:
-                self.profile_label.text = f"Error loading image: {e}"
-        choose_profile_button = Button(text="Choose profile picture", size_hint=(None,None), width=200, height=50)
-        choose_profile_button.bind(on_press=self.choose_profile_picture)
-        self.layout.add_widget(choose_profile_button)
-        remove_profile_button = Button(text= "Remove profile pcture", size_hint=(None,None), width=200, height=50)
-        remove_profile_button.bind(on_press=self.remove_profile_picture)
-        self.layout.add_widget(remove_profile_button)
-    def choose_profile_picture(self,instance):
-        file_popup = FileChooserListView(filters = ["*.png", "*.jpg", "*.jpeg"])
-        self.layout.add_widget(file_popup)
-    def remove_profile_picture(self,instance):
+        # Afișăm poza dacă există
+        if session.profile_picture and os.path.exists(session.profile_picture):
+            self.update_profile_picture(session.profile_picture)
+
+        choose_button = Button(text="Alege poza de profil", size_hint=(None, None), width=200, height=50)
+        choose_button.bind(on_press=self.choose_profile_picture)
+        self.layout.add_widget(choose_button)
+
+        remove_button = Button(text="Șterge poza de profil", size_hint=(None, None), width=200, height=50)
+        remove_button.bind(on_press=self.remove_profile_picture)
+        self.layout.add_widget(remove_button)
+
+    def choose_profile_picture(self, instance):
+        content = BoxLayout(orientation="vertical", spacing=10, padding=10)
+        chooser = FileChooserListView(filters=["*.png", "*.jpg", "*.jpeg"], size_hint=(1, 0.9))
+        confirm_btn = Button(text="Folosește această imagine", size_hint=(1, 0.1))
+        content.add_widget(chooser)
+        content.add_widget(confirm_btn)
+        popup = Popup(title="Alege poza de profil", content=content, size_hint=(0.9, 0.9))
+        popup.open()
+
+        def set_image(_):
+            if chooser.selection:
+                selected = chooser.selection[0]
+                app = App.get_running_app()
+                app.session.profile_picture = selected
+                app.session.save()
+                self.update_profile_picture(selected)
+                popup.dismiss()
+
+        confirm_btn.bind(on_press=set_image)
+
+    def update_profile_picture(self, image_path):
+        if hasattr(self, "profile_img"):
+            self.layout.remove_widget(self.profile_img)
+
+        try:
+            pil_image = PILImage.open(image_path).convert("RGBA")
+            size = min(pil_image.size)
+            mask = PILImage.new("L", (size, size), 0)
+            draw = ImageDraw.Draw(mask)
+            draw.ellipse((0, 0, size, size), fill=255)
+            cropped = pil_image.crop((0, 0, size, size))
+            cropped.putalpha(mask)
+            cropped = cropped.resize((100, 100))
+            img_data = cropped.tobytes()
+            texture = Texture.create(size=cropped.size, colorfmt='rgba')
+            texture.blit_buffer(img_data, colorfmt='rgba', bufferfmt='ubyte')
+            self.profile_img = Image(texture=texture, size_hint=(None, None), size=(100, 100))
+            self.layout.add_widget(self.profile_img)
+            self.profile_label.text = ""
+        except Exception as e:
+            self.profile_label.text = f"Eroare: {e}"
+
+    def remove_profile_picture(self, instance):
+        app = App.get_running_app()
+        app.session.profile_picture = ""
+        app.session.save()
+
+        if hasattr(self, "profile_img"):
+            self.layout.remove_widget(self.profile_img)
+
         self.profile_label.text = "No profile picture selected"
-        if os.path.exists("circular_profile.png"):
-            os.remove("circular_picture.png")
-            self.add_widget(self.layout)
 class NavigateScreen(Screen):
     def __init__(self,option, user_data, user_input, user_mail,**kwargs):
         super().__init__(**kwargs)
-        self.user_data = user_data
-        self.user_input = user_input
-        self.user_mail = user_mail
-        self.option = option
+        session = App.get_running_app().session
+        self.option = option 
+        user = session.username
+        mail = session.email
+        poza = session.profile_picture
         layout = BoxLayout(orientation = "vertical")
-        
+        app = App.get_running_app()
         video_path = "C:/Users/Adriana/Desktop/grid/WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
         if os.path.exists(video_path):
             self.video_player = Video(source = video_path, state="play", options = {"eos":"loop"})
@@ -280,7 +345,7 @@ class NavigateScreen(Screen):
             leaderboard_btn = Button(text = "LeaderBoard", size_hint=(None, None), width=150, height=50)
             leaderboard_btn.bind(on_press=lambda x: show_leaderboard())
             profile_btn = Button(text= "Profile", size_hint=(None, None), width=150, height=50)
-            profile_btn.bind(on_press=lambda x: open_profile_popup(self.user_data, self.user_input, self.user_mail))
+            profile_btn.bind(on_press=lambda x: open_profile_popup())
             top_buttons.add_widget(progress_btn)
             top_buttons.add_widget(leaderboard_btn)
             top_buttons.add_widget(profile_btn)
@@ -817,17 +882,18 @@ def show_leaderboard():
                   auto_dismiss=False)
     close_btn.bind(on_release=popup.dismiss)
     popup.open()
-def open_profile_popup(user_data, user_input, user_mail):
+def open_profile_popup():
+    app = App.get_running_app()
+    session = app.session
+    session = App.get_running_app().session
     layout = BoxLayout(orientation='vertical', spacing=15, padding=20)
+    title = Label(text="Profile", font_size=24)
 
-    # Titlu
-    title = Label(text="Profile", font_size=24, bold=True, color=(0.106, 0.129, 0.615, 1))
     layout.add_widget(title)
 
-    # Poza de profil (circulară, dacă există)
-    if "profile_picture" in user_data:
+    if session.profile_picture and os.path.exists(session.profile_picture):
         try:
-            pil_image = Image.open(user_data["profile_picture"]).convert("RGBA")
+            pil_image = Image.open(session.profile_picture).convert("RGBA")
             size = min(pil_image.size)
             mask = Image.new('L', (size, size), 0)
             draw = ImageDraw.Draw(mask)
@@ -843,41 +909,40 @@ def open_profile_popup(user_data, user_input, user_mail):
             img_widget = KivyImage(texture=texture, size_hint=(None, None), size=(100, 100))
             layout.add_widget(img_widget)
         except Exception as e:
-            layout.add_widget(Label(text=f"[color=ff0000]Nu s-a putut încărca poza[/color]", markup=True))
-
+            layout.add_widget(Label(text="⚠️ Eroare la încărcarea pozei"))
     else:
-        layout.add_widget(Label(text="(Nicio poză de profil)"))
+        layout.add_widget(Label(text="(Nicio poză de profil selectată)"))
 
-    # Username și Email
-    layout.add_widget(Label(text=f"Username: {user_input}", font_size=18, color=(1, 1, 1, 1)))
-    layout.add_widget(Label(text=f"E-mail: {user_mail}", font_size=18, color=(1, 1, 1, 1)))
+    layout.add_widget(Label(text=f"Username: {session.username}", font_size=18))
+    layout.add_widget(Label(text=f"E-mail: {session.email}", font_size=18))
 
-    # Buton de închidere
     close_btn = Button(text="Închide", size_hint=(1, None), height=40)
+    close_btn.bind(on_release=lambda x: popup.dismiss())
     layout.add_widget(close_btn)
 
     popup = Popup(title="Profil",
                   content=layout,
                   size_hint=(0.8, 0.8),
-                  background_color=(0.443, 0.102, 0.874, 1),
-                  title_color=(1, 1, 1, 1),
                   auto_dismiss=False)
-
-    close_btn.bind(on_release=popup.dismiss)
     popup.open()
+
 class MyApp(App):
     def build(self):
+        sm = ScreenManager()
+        app = App.get_running_app()
+        self.session = UserSession()
+        self.session.load()
         sm = ScreenManager(transition=FadeTransition())
+        self.user_input = ""          # va fi setat din LoginScreen
+        self.user_mail = ""
+        self.user_data = {}   
+        self.cale_imagine_selectata = "" 
         sm.add_widget(WelcomeScreen(name="welcome_screen"))
         sm.add_widget(VideoScreen(name="video_screen"))
         sm.add_widget(GridScreen(name="grid_screen"))
         sm.add_widget(LoginScreen(name="login_screen"))
         sm.add_widget(MainScreen(name="main"))
         sm.add_widget(SettingsScreen(name="settings_screen"))
-        sm.add_widget(NavigateScreen("Python", name="navigate_screen"))
-        sm.add_widget(NavigateScreen("C++", name="navigate_screen"))
-        sm.add_widget(NavigateScreen("JavaScript", name="navigate_screen"))
-
         sm.current = "welcome_screen"
         return sm
 
