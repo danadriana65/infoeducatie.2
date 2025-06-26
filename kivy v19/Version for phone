@@ -13,6 +13,8 @@ from kivy.uix.popup import Popup
 import os
 import sys
 import json
+from kivy.uix.image import Image as KivyImage
+from kivy.graphics.texture import Texture
 from kivy.clock import Clock
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
@@ -259,11 +261,14 @@ class SettingsScreen(Screen):
             os.remove("circular_picture.png")
             self.add_widget(self.layout)
 class NavigateScreen(Screen):
-    def __init__(self,option,**kwargs):
+    def __init__(self,option, user_data, user_input, user_mail,**kwargs):
         super().__init__(**kwargs)
+        self.user_data = user_data
+        self.user_input = user_input
+        self.user_mail = user_mail
         self.option = option
         layout = BoxLayout(orientation = "vertical")
-
+        
         video_path = "C:/Users/Adriana/Desktop/grid/WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
         if os.path.exists(video_path):
             self.video_player = Video(source = video_path, state="play", options = {"eos":"loop"})
@@ -273,7 +278,9 @@ class NavigateScreen(Screen):
             progress_btn = Button(text = "Progress", size_hint=(None, None), width =150, height=50)
             progress_btn.bind(on_press=lambda x: show_progress_kivy())
             leaderboard_btn = Button(text = "LeaderBoard", size_hint=(None, None), width=150, height=50)
+            leaderboard_btn.bind(on_press=lambda x: show_leaderboard())
             profile_btn = Button(text= "Profile", size_hint=(None, None), width=150, height=50)
+            profile_btn.bind(on_press=lambda x: open_profile_popup(self.user_data, self.user_input, self.user_mail))
             top_buttons.add_widget(progress_btn)
             top_buttons.add_widget(leaderboard_btn)
             top_buttons.add_widget(profile_btn)
@@ -371,9 +378,9 @@ class OptionsScreen(Screen):
           answers = answers_cpp_code[i]
           correct = correct_answers_cpp[0]
       elif self.planet_name == "Uranus" and self.selected_option == "Python":
-          question = questions[i]
-          answers = answers[i]
-          correct = correct_answers[0]
+          question = questions_python[i]
+          answers = answers_python[i]
+          correct = correct_answers_python[0]
       elif self.planet_name == "Venus" and self.selected_option == "Python":
           question = questions_python_b[i]
           answers = answers_python_b[i]
@@ -500,7 +507,7 @@ correct_answers_python_b = [
     "try:\n    x = int(input('Număr:'))\nexcept ValueError:\n    print('Eroare!')",
     "sorted(my_list)"
 ]
-questions = [
+questions_python = [
     "Ce este metoda __new__() în Python?",
     "Ce face @staticmethod în Python?",
     "Care este diferența dintre deepcopy() și copy()?",
@@ -510,7 +517,7 @@ questions = [
     "Ce rezultat va avea print(bool([]) == False)?" ]
   
 
-answers = [
+answers_python = [
     ["O metodă care creează o instanță înainte de __init__()", "O metodă folosită doar în moștenirea multiplă", "O metodă specială care returnează self", "O metodă de conversie între tipuri de date"],
     ["Creează o metodă care poate fi apelată doar de alte clase", "Definește o metodă statică care nu are acces la self", "Permite accesul la metodele private din clasă", "Transformă metoda într-o variabilă de clasă"],
     ["deepcopy() face conversia tipurilor de date", "copy() elimină referințele către obiectele originale", "deepcopy() este mai rapid decât copy()", "copy() creează o copie superficială, iar deepcopy() copiază recursiv obiectele"],
@@ -520,7 +527,7 @@ answers = [
     ["True", "False", "Va genera o eroare", "None"]
 ]
 
-correct_answers = ["O metodă care creează o instanță înainte de __init__()", "Definește o metodă statică care nu are acces la self", "copy() creează o copie superficială, iar deepcopy() copiază recursiv obiectele", "[0, 1, 4]", "Determină dacă scriptul este executat direct", "threading.pause()", "True"]
+correct_answers_python = ["O metodă care creează o instanță înainte de __init__()", "Definește o metodă statică care nu are acces la self", "copy() creează o copie superficială, iar deepcopy() copiază recursiv obiectele", "[0, 1, 4]", "Determină dacă scriptul este executat direct", "threading.pause()", "True"]
 questions_cpp = [
     "Care dintre următoarele este un mod corect de a declara o variabilă în C++?",
     "Ce cuvânt-cheie folosim pentru a aloca dinamic memorie în C++?",
@@ -751,7 +758,6 @@ class QuestionScreen(Screen):
         self.manager.add_widget(video2_screen)
         self.manager.current = 'video'
 
-
 def save_progress():
     global user_progress
     print("Progres salvat:", user_progress)
@@ -782,6 +788,83 @@ def show_progress_kivy():
 
     close_button.bind(on_release=popup.dismiss)
     popup.open()
+
+def show_leaderboard():
+    total_correct = sum(c for planets in user_progress.values() for c in planets.values())
+    if total_correct >= 21:
+        award = "🏆 Aur"
+    elif total_correct >= 14:
+        award = "🥈 Argint"
+    elif total_correct >= 7:
+        award = "🥉 Bronz"
+    else:
+        award = "🔹 Fără medalie - mai încearcă!"
+
+    message = f"Premiul tău: {award}\nAi răspuns corect la {total_correct} întrebări!"
+
+    content = BoxLayout(orientation='vertical', padding=20, spacing=10)
+    label = Label(text=message, color=(1, 1, 1, 1), halign='center')
+    label.bind(size=label.setter('text_size'))
+    close_btn = Button(text="Închide", size_hint=(1, None), height=40)
+    content.add_widget(label)
+    content.add_widget(close_btn)
+
+    popup = Popup(title="Leaderboard",
+                  content=content,
+                  size_hint=(0.8, 0.5),
+                  background_color=(0, 0.137, 0.4, 1),
+                  title_color=(1, 1, 1, 1),
+                  auto_dismiss=False)
+    close_btn.bind(on_release=popup.dismiss)
+    popup.open()
+def open_profile_popup(user_data, user_input, user_mail):
+    layout = BoxLayout(orientation='vertical', spacing=15, padding=20)
+
+    # Titlu
+    title = Label(text="Profile", font_size=24, bold=True, color=(0.106, 0.129, 0.615, 1))
+    layout.add_widget(title)
+
+    # Poza de profil (circulară, dacă există)
+    if "profile_picture" in user_data:
+        try:
+            pil_image = Image.open(user_data["profile_picture"]).convert("RGBA")
+            size = min(pil_image.size)
+            mask = Image.new('L', (size, size), 0)
+            draw = ImageDraw.Draw(mask)
+            draw.ellipse((0, 0, size, size), fill=255)
+            cropped = pil_image.crop((0, 0, size, size))
+            cropped.putalpha(mask)
+
+            cropped = cropped.resize((100, 100))
+            img_data = cropped.tobytes()
+            texture = Texture.create(size=cropped.size, colorfmt='rgba')
+            texture.blit_buffer(img_data, colorfmt='rgba', bufferfmt='ubyte')
+
+            img_widget = KivyImage(texture=texture, size_hint=(None, None), size=(100, 100))
+            layout.add_widget(img_widget)
+        except Exception as e:
+            layout.add_widget(Label(text=f"[color=ff0000]Nu s-a putut încărca poza[/color]", markup=True))
+
+    else:
+        layout.add_widget(Label(text="(Nicio poză de profil)"))
+
+    # Username și Email
+    layout.add_widget(Label(text=f"Username: {user_input}", font_size=18, color=(1, 1, 1, 1)))
+    layout.add_widget(Label(text=f"E-mail: {user_mail}", font_size=18, color=(1, 1, 1, 1)))
+
+    # Buton de închidere
+    close_btn = Button(text="Închide", size_hint=(1, None), height=40)
+    layout.add_widget(close_btn)
+
+    popup = Popup(title="Profil",
+                  content=layout,
+                  size_hint=(0.8, 0.8),
+                  background_color=(0.443, 0.102, 0.874, 1),
+                  title_color=(1, 1, 1, 1),
+                  auto_dismiss=False)
+
+    close_btn.bind(on_release=popup.dismiss)
+    popup.open()
 class MyApp(App):
     def build(self):
         sm = ScreenManager(transition=FadeTransition())
@@ -794,6 +877,7 @@ class MyApp(App):
         sm.add_widget(NavigateScreen("Python", name="navigate_screen"))
         sm.add_widget(NavigateScreen("C++", name="navigate_screen"))
         sm.add_widget(NavigateScreen("JavaScript", name="navigate_screen"))
+
         sm.current = "welcome_screen"
         return sm
 
