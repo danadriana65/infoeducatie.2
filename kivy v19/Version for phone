@@ -64,36 +64,48 @@ class VideoScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.layout = BoxLayout(orientation="vertical")
-
-        # Default video path
         self.default_video_path = "C:/Users/Adriana/infoeducatie.2-3/WhatsApp Video 2025-03-31 at 12.10.50_af799974.mp4"
+        self.add_widget(self.layout)
 
         if not os.path.exists(self.default_video_path):
             self.layout.add_widget(Label(text="Default video file not found! Please select a file."))
 
-            file_chooser = FileChooserListView(filters=["*.mp4"])
-            self.layout.add_widget(file_chooser)
+            self.file_chooser = FileChooserListView(filters=["*.mp4"])
+            self.layout.add_widget(self.file_chooser)
 
             select_button = Button(text="Select File")
-            select_button.bind(on_press=lambda x: self.play_video(file_chooser.selection))
+            select_button.bind(on_press=self.select_custom_video)
             self.layout.add_widget(select_button)
         else:
             self.play_video(self.default_video_path)
 
-        self.add_widget(self.layout)
+    def select_custom_video(self, instance):
+        if self.file_chooser.selection:
+            selected = self.file_chooser.selection[0]
+            self.play_video(selected)
 
     def play_video(self, video_path):
-        if not video_path:
-            return
+      self.layout.clear_widgets()
 
-        self.layout.clear_widgets()
-        video_player = VideoPlayer(source=video_path, state="play")
-        video_player.bind(state=self.on_video_end)
-        self.layout.add_widget(video_player)
+      if isinstance(video_path, list):
+        video_path = video_path[0]
 
-    def on_video_end(self, instance, value):
-        if value == "stop":  # Detect video completion
-            self.manager.current = "grid_screen"
+      self.video_player = VideoPlayer(source=video_path, state="play", options={"eos": "pause"})
+      self.layout.add_widget(self.video_player)
+
+    # Începem verificarea stării la fiecare 0.5 secunde
+      Clock.schedule_once(self.start_video_check, 1.0)
+    def start_video_check(self, dt):
+       Clock.schedule_interval(self.check_video_end, 0.5)
+
+    def check_video_end(self, dt):
+        try:
+           if self.video_player.position >= self.video_player.duration - 0.3:
+            Clock.unschedule(self.check_video_end)
+            self.manager.current = "login_screen"
+        except:
+            pass  # Uneori durata nu e disponibilă imediat
+
 class LoginScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -157,17 +169,27 @@ class GridScreen(Screen):
         super().__init__(**kwargs)
         self.layout = FloatLayout()
 
-        # Background Video
         self.video_path = r"C:\Users\Adriana\infoeducatie.2-3\infoeducatie.2\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
         if os.path.exists(self.video_path):
-            self.video_player = VideoPlayer(source=self.video_path, play=True, options={"eos": "loop"})
+            self.video_player = VideoPlayer(source=self.video_path, play=True, options={"eos": "loop"}, size_hint=(1, 1), pos_hint={"x": 0, "y": 0})
+            self.video_player.allow_fullscreen = False
+            self.video_player.allow_stretch = True
             self.layout.add_widget(self.video_player)
 
-        # Overlay UI Elements
-        self.welcome_label = Label(text="Welcome, User!", font_size=24, pos_hint={"center_x": 0.5, "center_y": 0.85})
+        # 🔹 Elemente UI deasupra videoclipului
+        self.welcome_label = Label(
+            text="Welcome, User!",
+            font_size=24,
+            pos_hint={"center_x": 0.5, "center_y": 0.85}
+        )
         self.layout.add_widget(self.welcome_label)
 
-        sign_out_button = Button(text="Continue", size_hint=(0.3, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.15}, on_press=self.sign_out)
+        sign_out_button = Button(
+            text="Continue",
+            size_hint=(0.3, 0.1),
+            pos_hint={"center_x": 0.5, "center_y": 0.15},
+            on_press=self.sign_out
+        )
         self.layout.add_widget(sign_out_button)
 
         self.add_widget(self.layout)
@@ -192,28 +214,62 @@ class GridScreen(Screen):
         self.manager.current = "login_screen"
 class MainScreen(Screen):
     def __init__(self,**kwargs):
-     super().__init__(**kwargs)
-     layout = BoxLayout(orientation = "vertical")
-     video_path = "C:\\Users\\Adriana\\Desktop\\grid\\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
-     if os.path.exists(video_path):
-         video = Video(source=video_path,play=True, allow_stretch=True)
-         layout.add_widget(video)
-     options_layout=BoxLayout(orientation = "horizontal")
-     languages = [("C++", "C:\\Users\\Adriana\\Desktop\\grid\\ISO_C++_Logo.svg(1).png"), 
-                     ("Python", "C:\\Users\\Adriana\\Desktop\\grid\\Python.svg(1).png"),
-                     ("JavaScript", "C:\\Users\\Adriana\\Desktop\\grid\\1698604163003(1).png")]
-     for lang, sticker in languages:
-         btn = Button(text=lang, size_hint=(None, None), width=250, height=50)
-         img = Image(source=sticker, size_hint=(None, None), width=50, height=50)
-         btn.bind(on_press=lambda instance, language=lang: self.switch_to_navigate(language))
-         options_layout.add_widget(btn)
-         options_layout.add_widget(img)
-     undo_button = Button(text="Undo", size_hint=(0.3, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.15}, on_press=self.undo)
-     layout.add_widget(undo_button)
-     setting_button = Button(text="Settings", size_hint=(0.2,0.1), pos_hint={"center_x": 0.5, "center_y": 0.15},on_press=self.settings)
-     layout.add_widget(setting_button)
-     layout.add_widget(options_layout)
-     self.add_widget(layout)
+       super().__init__(**kwargs)
+       layout = FloatLayout()
+
+        # 🎥 Video full screen pe fundal
+       video_path = "C:\\Users\\Adriana\\Desktop\\grid\\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
+       if os.path.exists(video_path):
+            self.video = Video(source=video_path, play=True, allow_stretch=True, options={"eos": "loop"},
+                               size_hint=(1, 1), pos_hint={"x": 0, "y": 0})
+            layout.add_widget(self.video)
+
+        # 🖥️ Sigle + Butoane de selecție
+       languages = [
+            ("C++", "C:\\Users\\Adriana\\Desktop\\grid\\ISO_C++_Logo.svg(1).png"), 
+            ("Python", "C:\\Users\\Adriana\\Desktop\\grid\\Python.svg(1).png"),
+            ("JavaScript", "C:\\Users\\Adriana\\Desktop\\grid\\1698604163003(1).png")
+        ]
+
+       x_positions = [0.15, 0.4, 0.65]  # Poziții pentru cele 3 sigle
+
+       for idx, (lang, sticker) in enumerate(languages):
+            btn = Button(
+                text=lang,
+                size_hint=(0.2, 0.1),
+                pos_hint={"x": x_positions[idx], "y": 0.2}
+            )
+            img = Image(
+                source=sticker,
+                size_hint=(None, None),
+                size=(80, 80),
+                pos_hint={"x": x_positions[idx] + 0.03, "y": 0.33}
+            )
+
+            btn.bind(on_press=lambda instance, language=lang: self.switch_to_navigate(language))
+
+            layout.add_widget(btn)
+            layout.add_widget(img)
+
+        # 🔙 Undo Button
+       undo_button = Button(
+            text="Undo",
+            size_hint=(0.2, 0.1),
+            pos_hint={"x": 0.1, "y": 0.05},
+            on_press=self.undo
+        )
+       layout.add_widget(undo_button)
+
+        # ⚙️ Settings Button
+       setting_button = Button(
+            text="Settings",
+            size_hint=(0.2, 0.1),
+            pos_hint={"x": 0.7, "y": 0.05},
+            on_press=self.settings
+        )
+       layout.add_widget(setting_button)
+
+       self.add_widget(layout)
     def switch_to_navigate(self, option):
        app = App.get_running_app()
        screen_name = f"navigate_screen_{option}"
