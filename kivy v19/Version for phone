@@ -251,7 +251,6 @@ class MainScreen(Screen):
             layout.add_widget(btn)
             layout.add_widget(img)
 
-        # 🔙 Undo Button
        undo_button = Button(
             text="Undo",
             size_hint=(0.2, 0.1),

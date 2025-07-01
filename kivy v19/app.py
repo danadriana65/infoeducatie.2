@@ -63,32 +63,42 @@ class WelcomeScreen(Screen):
 class VideoScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.layout = BoxLayout(orientation="vertical")
-        
+        self.layout = FloatLayout()  # Changed from BoxLayout
         self.default_video_path = "videos/WhatsApp Video 2025-03-31 at 12.10.50_af799974.mp4"
         self.add_widget(self.layout)
 
         if not os.path.exists(self.default_video_path):
-            self.layout.add_widget(Label(text="Default video file not found! Please select a file."))
+            self.layout.add_widget(Label(
+                text="Default video file not found! Please select a file.",
+                pos_hint={"center_x": 0.5, "center_y": 0.7},
+                size_hint=(None, None)
+            ))
 
-            self.file_chooser = FileChooserListView(filters=["*.mp4"])
+            self.file_chooser = FileChooserListView(filters=["*.mp4"],
+                                                    size_hint=(0.8, 0.5),
+                                                    pos_hint={"center_x": 0.5, "y": 0.2})
             self.layout.add_widget(self.file_chooser)
 
-            select_button = Button(text="Select File")
+            select_button = Button(text="Select File",
+                                   size_hint=(0.3, 0.1),
+                                   pos_hint={"center_x": 0.5, "y": 0.1})
             select_button.bind(on_press=self.select_custom_video)
             self.layout.add_widget(select_button)
         else:
             self.play_video(self.default_video_path)
+
+        # Add skip button always, at bottom
         skip_button = Button(
-           text="Continue to Login",
-           size_hint=(0.4, 0.1),
-           pos_hint={"center_x": 0.5, "y": 0.05},
-           on_press=self.skip_to_login
-)
+            text="Continue to Login",
+            size_hint=(0.4, 0.1),
+            pos_hint={"center_x": 0.5, "y": 0.05},
+            on_press=self.skip_to_login
+        )
         self.layout.add_widget(skip_button)
+
     def skip_to_login(self, instance):
-       Clock.unschedule(self.check_video_end)  # Just in case it was scheduled
-       self.manager.current = "login_screen"
+        Clock.unschedule(self.check_video_end)
+        self.manager.current = "login_screen"
 
     def select_custom_video(self, instance):
         if self.file_chooser.selection:
@@ -96,27 +106,41 @@ class VideoScreen(Screen):
             self.play_video(selected)
 
     def play_video(self, video_path):
-      self.layout.clear_widgets()
+        self.layout.clear_widgets()
 
-      if isinstance(video_path, list):
-        video_path = video_path[0]
+        if isinstance(video_path, list):
+            video_path = video_path[0]
 
-      self.video_player = VideoPlayer(source=video_path, state="play", options={"eos": "pause"})
-      self.layout.add_widget(self.video_player)
+        self.video_player = VideoPlayer(
+            source=video_path,
+            state="play",
+            options={"eos": "pause"},
+            allow_stretch=True,
+            size_hint=(1, 1),
+            pos_hint={"x": 0, "y": 0}
+        )
+        self.layout.add_widget(self.video_player)
 
-    # Începem verificarea stării la fiecare 0.5 secunde
-      Clock.schedule_once(self.start_video_check, 1.0)
+        # Add skip button again after clearing widgets
+        skip_button = Button(
+            text="Continue to Login",
+            size_hint=(0.4, 0.1),
+            pos_hint={"center_x": 0.5, "y": 0.05},
+            on_press=self.skip_to_login
+        )
+        self.layout.add_widget(skip_button)
+
+        Clock.schedule_once(self.start_video_check, 1.0)
+
     def start_video_check(self, dt):
-       Clock.schedule_interval(self.check_video_end, 0.5)
+        Clock.schedule_interval(self.check_video_end, 0.5)
 
     def check_video_end(self, dt):
         if not self.video_player.duration or self.video_player.duration == 0:
-           return  # Still loading video metadata
-
+            return  # Video still loading
         if self.video_player.position >= self.video_player.duration - 0.3:
             Clock.unschedule(self.check_video_end)
             self.manager.current = "login_screen"
-
 
 class LoginScreen(Screen):
     def __init__(self, **kwargs):
