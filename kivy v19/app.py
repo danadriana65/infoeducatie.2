@@ -64,6 +64,7 @@ class VideoScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.layout = BoxLayout(orientation="vertical")
+        
         self.default_video_path = "videos/WhatsApp Video 2025-03-31 at 12.10.50_af799974.mp4"
         self.add_widget(self.layout)
 
@@ -78,6 +79,16 @@ class VideoScreen(Screen):
             self.layout.add_widget(select_button)
         else:
             self.play_video(self.default_video_path)
+        skip_button = Button(
+           text="Continue to Login",
+           size_hint=(0.4, 0.1),
+           pos_hint={"center_x": 0.5, "y": 0.05},
+           on_press=self.skip_to_login
+)
+        self.layout.add_widget(skip_button)
+    def skip_to_login(self, instance):
+       Clock.unschedule(self.check_video_end)  # Just in case it was scheduled
+       self.manager.current = "login_screen"
 
     def select_custom_video(self, instance):
         if self.file_chooser.selection:
@@ -99,19 +110,20 @@ class VideoScreen(Screen):
        Clock.schedule_interval(self.check_video_end, 0.5)
 
     def check_video_end(self, dt):
-        try:
-           if self.video_player.position >= self.video_player.duration - 0.3:
+        if not self.video_player.duration or self.video_player.duration == 0:
+           return  # Still loading video metadata
+
+        if self.video_player.position >= self.video_player.duration - 0.3:
             Clock.unschedule(self.check_video_end)
             self.manager.current = "login_screen"
-        except:
-            pass  # Uneori durata nu e disponibilă imediat
+
 
 class LoginScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.layout = FloatLayout()
 
-        self.video_path = r"C:\Users\Adriana\infoeducatie.2-3\infoeducatie.2\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
+        self.video_path = r"videos/WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
         if os.path.exists(self.video_path):
             self.video_player = VideoPlayer(source=self.video_path, play=True, options={"eos": "loop"})
             self.layout.add_widget(self.video_player)
@@ -169,7 +181,7 @@ class GridScreen(Screen):
         super().__init__(**kwargs)
         self.layout = FloatLayout()
 
-        self.video_path = r"C:\Users\Adriana\infoeducatie.2-3\infoeducatie.2\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
+        self.video_path = r"videos/WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
         if os.path.exists(self.video_path):
             self.video_player = VideoPlayer(source=self.video_path, play=True, options={"eos": "loop"}, size_hint=(1, 1), pos_hint={"x": 0, "y": 0})
             self.video_player.allow_fullscreen = False
@@ -218,7 +230,7 @@ class MainScreen(Screen):
        layout = FloatLayout()
 
         # 🎥 Video full screen pe fundal
-       video_path = "C:\\Users\\Adriana\\Desktop\\grid\\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
+       video_path = "videos/WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
        if os.path.exists(video_path):
             self.video = Video(source=video_path, play=True, allow_stretch=True, options={"eos": "loop"},
                                size_hint=(1, 1), pos_hint={"x": 0, "y": 0})
@@ -226,9 +238,9 @@ class MainScreen(Screen):
 
         # 🖥️ Sigle + Butoane de selecție
        languages = [
-            ("C++", "C:\\Users\\Adriana\\Desktop\\grid\\ISO_C++_Logo.svg(1).png"), 
-            ("Python", "C:\\Users\\Adriana\\Desktop\\grid\\Python.svg(1).png"),
-            ("JavaScript", "C:\\Users\\Adriana\\Desktop\\grid\\1698604163003(1).png")
+            ("C++", "images/ISO_C++_Logo.svg(1).png"), 
+            ("Python", "images/Python.svg(1).png"),
+            ("JavaScript", "images/1698604163003(1).png")
         ]
 
        x_positions = [0.15, 0.4, 0.65]  # Poziții pentru cele 3 sigle
@@ -390,7 +402,7 @@ class NavigateScreen(Screen):
         poza = session.profile_picture
         layout = BoxLayout(orientation = "vertical")
         app = App.get_running_app()
-        video_path = "C:/Users/Adriana/Desktop/grid/WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
+        video_path = "videos/WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
         if os.path.exists(video_path):
             self.video_player = Video(source = video_path, state="play", options = {"eos":"loop"})
             layout.add_widget(self.video_player)
@@ -418,9 +430,9 @@ class NavigateScreen(Screen):
                 theory_btn.bind(on_press=lambda instance: webbrowser.open(link_map[self.option]))
                 layout.add_widget(theory_btn)
             planet_images = {
-            "Uranus": "C:/Users/Adriana/infoeducatie.2-2/Uranus(1).png",
-            "Venus": "C:/Users/Adriana/infoeducatie.2-2/Venus.png",
-            "Saturn": "C:/Users/Adriana/infoeducatie.2-2/Saturn.png"
+            "Uranus": "images/Uranus(1).png",
+            "Venus": "images/Venus.png",
+            "Saturn": "images/Saturn.png"
             }
             planet_buttons = BoxLayout(size_hint=(1,0.3))
             for planet_name, image_path in planet_images.items():
@@ -867,10 +879,10 @@ class QuestionScreen(Screen):
             button.background_color = (0, 1, 0, 1)
             user_progress.setdefault(option, {}).setdefault(planet, 0)
             user_progress[option][planet] += 1
-            video_path = r"C:\Users\Adriana\infoeducatie.2-1\WhatsApp Video 2025-05-17 at 22.04.13_3d19574a.mp4"
+            video_path = r"videos\WhatsApp Video 2025-05-17 at 22.04.13_3d19574a.mp4"
         else:
             button.background_color = (1, 0, 0, 1)
-            video_path = r"C:\Users\Adriana\infoeducatie.2-1\WhatsApp Video 2025-05-17 at 22.12.34_8b843c0c.mp4"
+            video_path = r"videos\WhatsApp Video 2025-05-17 at 22.12.34_8b843c0c.mp4"
 
         save_progress()
 
