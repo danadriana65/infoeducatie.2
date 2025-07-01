@@ -213,27 +213,26 @@ class GridScreen(Screen):
     def sign_out(self, instance):
         self.manager.current = "login_screen"
 class MainScreen(Screen):
-    def __init__(self,**kwargs):
-       super().__init__(**kwargs)
-       layout = FloatLayout()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        layout = FloatLayout()
 
-        # 🎥 Video full screen pe fundal
-       video_path = "C:\\Users\\Adriana\\Desktop\\grid\\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
-       if os.path.exists(video_path):
+        # 🎥 Video pe fundal
+        video_path = "C:\\Users\\Adriana\\Desktop\\grid\\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
+        if os.path.exists(video_path):
             self.video = Video(source=video_path, play=True, allow_stretch=True, options={"eos": "loop"},
                                size_hint=(1, 1), pos_hint={"x": 0, "y": 0})
             layout.add_widget(self.video)
 
-        # 🖥️ Sigle + Butoane de selecție
-       languages = [
+        # 📍 Sigle și butoane
+        languages = [
             ("C++", "C:\\Users\\Adriana\\Desktop\\grid\\ISO_C++_Logo.svg(1).png"), 
             ("Python", "C:\\Users\\Adriana\\Desktop\\grid\\Python.svg(1).png"),
             ("JavaScript", "C:\\Users\\Adriana\\Desktop\\grid\\1698604163003(1).png")
         ]
+        x_positions = [0.15, 0.4, 0.65]
 
-       x_positions = [0.15, 0.4, 0.65]  # Poziții pentru cele 3 sigle
-
-       for idx, (lang, sticker) in enumerate(languages):
+        for idx, (lang, sticker) in enumerate(languages):
             btn = Button(
                 text=lang,
                 size_hint=(0.2, 0.1),
@@ -251,42 +250,55 @@ class MainScreen(Screen):
             layout.add_widget(btn)
             layout.add_widget(img)
 
-       undo_button = Button(
+        # 🏆 Clasament
+        ranking_button = Button(text="Clasament", size_hint=(0.2, 0.1), pos_hint={"x": 0.7, "y": 0.85})
+        ranking_button.bind(on_press=self.go_to_ranking)
+        layout.add_widget(ranking_button)
+
+        # 🔙 Undo
+        undo_button = Button(
             text="Undo",
             size_hint=(0.2, 0.1),
             pos_hint={"x": 0.1, "y": 0.05},
             on_press=self.undo
         )
-       layout.add_widget(undo_button)
+        layout.add_widget(undo_button)
 
-        # ⚙️ Settings Button
-       setting_button = Button(
+        # ⚙️ Settings
+        setting_button = Button(
             text="Settings",
             size_hint=(0.2, 0.1),
             pos_hint={"x": 0.7, "y": 0.05},
             on_press=self.settings
         )
-       layout.add_widget(setting_button)
+        layout.add_widget(setting_button)
 
-       self.add_widget(layout)
+        self.add_widget(layout)
+
     def switch_to_navigate(self, option):
-       app = App.get_running_app()
-       screen_name = f"navigate_screen_{option}"
+        app = App.get_running_app()
+        screen_name = f"navigate_screen_{option}"
 
-       if not self.manager.has_screen(screen_name):
-        self.manager.add_widget(NavigateScreen(
-            option,
-            {"profile_picture": app.session.profile_picture},
-            app.session.username,
-            app.session.email,
-            name=screen_name
-        ))
+        if not self.manager.has_screen(screen_name):
+            self.manager.add_widget(NavigateScreen(
+                option,
+                {"profile_picture": app.session.profile_picture},
+                app.session.username,
+                app.session.email,
+                name=screen_name
+            ))
 
         self.manager.current = screen_name
-    def settings(self,instance):
-        self.manager.current="settings_screen"
+
+    def settings(self, instance):
+        self.manager.current = "settings_screen"
+
     def undo(self, instance):
-         self.manager.current="login_screen"
+        self.manager.current = "login_screen"
+
+    def go_to_ranking(self, instance):
+        self.manager.current = "ranking_screen"
+
 class UserDataManager:
     def __init__(self, file_path="user_data.json"):
         self.file_path = file_path
@@ -980,6 +992,31 @@ def open_profile_popup():
                   size_hint=(0.8, 0.8),
                   auto_dismiss=False)
     popup.open()
+class RankingScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        layout = BoxLayout(orientation="vertical", spacing=10, padding=20)
+
+        user_data = user_data_manager.load_user_data()
+        sorted_users = sorted(
+            user_data.items(),
+            key=lambda item: item[1].get("score", 0),
+            reverse=True
+        )
+
+        layout.add_widget(Label(text="🏆 Clasament Utilizatori", font_size=24))
+
+        for idx, (email, data) in enumerate(sorted_users, start=1):
+            line = f"{idx}. {data.get('username', 'N/A')} - {data.get('score', 0)} puncte"
+            layout.add_widget(Label(text=line, font_size=18))
+
+        back_button = Button(text="Înapoi", size_hint=(0.3, 0.1))
+        back_button.bind(on_press=self.go_to_main)
+        layout.add_widget(back_button)
+
+        self.add_widget(layout)
+    def go_to_main(self, instance):
+           self.manager.current = "main_screen"
 
 class MyApp(App):
     def build(self):
@@ -996,8 +1033,10 @@ class MyApp(App):
         sm.add_widget(VideoScreen(name="video_screen"))
         sm.add_widget(GridScreen(name="grid_screen"))
         sm.add_widget(LoginScreen(name="login_screen"))
+        sm.add_widget(MainScreen(name="main_screen"))
         sm.add_widget(MainScreen(name="main"))
         sm.add_widget(SettingsScreen(name="settings_screen"))
+        sm.add_widget(RankingScreen(name="ranking_screen"))
         sm.current = "welcome_screen"
         return sm
 
