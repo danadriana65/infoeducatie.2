@@ -824,24 +824,30 @@ correct_answers_javascript_error = [
 class Video2Screen(Screen):
     def __init__(self, video_path, next_screen, question_data, **kwargs):
         super().__init__(**kwargs)
-        self.question_data = question_data
         self.next_screen = next_screen
+        self.question_data = question_data
 
-        layout = BoxLayout(orientation='vertical')
+        self.layout = BoxLayout(orientation='vertical')
+        self.add_widget(self.layout)
+
         self.video = Video(source=video_path, state='play', options={'eos': 'stop'})
         self.video.bind(on_eos=self.on_video_end)
+        self.layout.add_widget(self.video)
 
-        layout.add_widget(self.video)
-        self.add_widget(layout)
-
+        skip_button = Button(
+            text="Continuă",
+            size_hint=(0.4, 0.1),
+            pos_hint={"center_x": 0.5}
+        )
+        skip_button.bind(on_press=self.on_video_end)
+        self.layout.add_widget(skip_button)
     def on_video_end(self, *args):
-       if not self.manager.has_screen(self.next_screen):
-        # Dacă ecranul nu există, îl creezi; altfel sari peste
-        self.manager.add_widget(QuestionScreen(self.question_data, name=self.next_screen))
-
-        self.manager.current = self.next_screen
+        # Tranziție către ecranul opțiuni
+        if self.manager.has_screen(self.next_screen):
+            self.manager.current = self.next_screen
+        else:
+            print(f"Eroare: ecranul '{self.next_screen}' nu este înregistrat în ScreenManager.")
         self.manager.remove_widget(self)
-
 # Screen to display the question and handle answers
 user_progress ={}
 class QuestionScreen(Screen):
@@ -862,7 +868,7 @@ class QuestionScreen(Screen):
             self.buttons.append(btn)
 
         back_btn = Button(text="Undo", size_hint_y=None, height=50)
-        back_btn.bind(on_press=lambda x: setattr(self.manager, "current", "options"))
+        back_btn.bind(on_press=lambda x: setattr(self.manager, "current", "options_screen"))
         layout.add_widget(back_btn)
 
         self.add_widget(layout)
@@ -1033,6 +1039,17 @@ class MyApp(App):
         sm.add_widget(WelcomeScreen(name="welcome_screen"))
         sm.add_widget(VideoScreen(name="video_screen"))
         sm.add_widget(GridScreen(name="grid_screen"))
+        sm.add_widget(OptionsScreen(planet_name="Uranus", selected_option="Python", name="options_screen"))
+        sm.add_widget(OptionsScreen(planet_name="Venus", selected_option="Python", name="options_screen"))
+        sm.add_widget(OptionsScreen(planet_name="Saturn", selected_option="Python", name="options_screen"))
+  # or whatever your class is
+        sm.add_widget(OptionsScreen(planet_name="Uranus", selected_option="C++", name="options_screen"))
+        sm.add_widget(OptionsScreen(planet_name="Venus", selected_option="C++", name="options_screen"))
+        sm.add_widget(OptionsScreen(planet_name="Saturn", selected_option="C++", name="options_screen"))
+        sm.add_widget(OptionsScreen(planet_name="Uranus", selected_option="JavaScript", name="options_screen"))
+        sm.add_widget(OptionsScreen(planet_name="Venus", selected_option="JavaScript", name="options_screen"))
+        sm.add_widget(OptionsScreen(planet_name="Saturn", selected_option="JavaScript", name="options_screen"))
+        
         sm.add_widget(LoginScreen(name="login_screen"))
         sm.add_widget(MainScreen(name="main_screen"))
         sm.add_widget(MainScreen(name="main"))
