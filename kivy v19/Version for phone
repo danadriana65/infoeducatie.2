@@ -835,11 +835,12 @@ class Video2Screen(Screen):
         self.add_widget(layout)
 
     def on_video_end(self, *args):
-       if not self.manager.has_screen('question'):
-        self.manager.add_widget(QuestionScreen(self.question_data, name='question'))
+       if not self.manager.has_screen(self.next_screen):
+        # Dacă ecranul nu există, îl creezi; altfel sari peste
+        self.manager.add_widget(QuestionScreen(self.question_data, name=self.next_screen))
 
-        self.manager.current = 'question'
-        self.manager.remove_widget(self)  # Elimină doar Video2Screen
+        self.manager.current = self.next_screen
+        self.manager.remove_widget(self)
 
 # Screen to display the question and handle answers
 user_progress ={}
@@ -886,7 +887,7 @@ class QuestionScreen(Screen):
         save_progress()
 
         # Transition to video screen
-        video2_screen = Video2Screen(video_path, 'question', self.question_data, name='video')
+        video2_screen = Video2Screen(video_path, 'options_screen', self.question_data, name='video')
         self.manager.add_widget(video2_screen)
         self.manager.current = 'video'
 
