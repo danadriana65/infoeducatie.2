@@ -110,38 +110,42 @@ class LoginScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.layout = FloatLayout()
+        self.add_widget(self.layout)
 
+        # 🎬 Video pe fundal
         self.video_path = r"C:\Users\Adriana\infoeducatie.2-3\infoeducatie.2\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
         if os.path.exists(self.video_path):
             self.video_player = VideoPlayer(source=self.video_path, play=True, options={"eos": "loop"})
             self.layout.add_widget(self.video_player)
 
-        self.layout.add_widget(Label(text="Welcome to Cosmiccode!", font_size=24, pos_hint={"center_x": 0.5, "center_y": 0.85}))
+        # 🔤 Etichete și input-uri
+        self.layout.add_widget(Label(text="Welcome to Cosmiccode!", font_size=24,
+                                     pos_hint={"center_x": 0.5, "center_y": 0.85}))
 
-        self.username = TextInput(hint_text="Username", size_hint=(0.5, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.65})
+        self.username = TextInput(hint_text="Username", size_hint=(0.5, 0.1),
+                                  pos_hint={"center_x": 0.5, "center_y": 0.65})
+        self.email = TextInput(hint_text="Your Email", size_hint=(0.5, 0.1),
+                               pos_hint={"center_x": 0.5, "center_y": 0.55})
+        self.password = TextInput(hint_text="Password", password=True, size_hint=(0.5, 0.1),
+                                  pos_hint={"center_x": 0.5, "center_y": 0.45})
+
         self.layout.add_widget(self.username)
-
-        self.email = TextInput(hint_text="Your Email", size_hint=(0.5, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.55})
         self.layout.add_widget(self.email)
-
-        self.password = TextInput(hint_text="Password", password=True, size_hint=(0.5, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.45})
         self.layout.add_widget(self.password)
 
         self.message_label = Label(text="", pos_hint={"center_x": 0.5, "center_y": 0.35})
         self.layout.add_widget(self.message_label)
 
-        submit_button = Button(text="Create Account", size_hint=(0.3, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.25}, on_press=self.submit_username)
+        # 🔘 Butoane
+        submit_button = Button(text="Create Account", size_hint=(0.3, 0.1),
+                               pos_hint={"center_x": 0.5, "center_y": 0.25})
+        submit_button.bind(on_press=self.submit_username)
         self.layout.add_widget(submit_button)
 
-        login_button = Button(text="Login", size_hint=(0.3, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.15}, on_press=self.login)
+        login_button = Button(text="Login", size_hint=(0.3, 0.1),
+                              pos_hint={"center_x": 0.5, "center_y": 0.15})
+        login_button.bind(on_press=self.login)
         self.layout.add_widget(login_button)
-
-        self.add_widget(self.layout)
-        App.get_running_app().session.set_profile(
-    username=self.username.text.strip(),
-    email=self.email.text.strip(),
-    image_path=""
-)
 
     def submit_username(self, instance):
         entered_username = self.username.text.strip()
@@ -159,7 +163,15 @@ class LoginScreen(Screen):
         entered_password = self.password.text.strip()
 
         if verify_user(entered_username, entered_password):
-            self.manager.get_screen("grid_screen").set_user_details(entered_username)  # Pass user data
+            # ✅ Salvăm utilizatorul activ
+            with open("active_user.txt", "w") as f:
+                f.write(entered_username)
+
+            # 👉 Transmitem datele către grid_screen dacă există
+            if self.manager.has_screen("grid_screen"):
+                self.manager.get_screen("grid_screen").set_user_details(entered_username)
+
+            # 🛰️ Tranziție către ecranul principal
             self.manager.current = "main"
         else:
             self.message_label.text = "Invalid credentials!"
@@ -313,24 +325,32 @@ class UserDataManager:
         with open(self.file_path, "w") as f:
             json.dump(data, f, indent=4)
 user_data_manager = UserDataManager()
+def load_active_user():
+    try:
+        with open("active_user.txt", "r") as f:
+            username = f.read().strip()
+        all_users = load_user_credentials()
+        return all_users.get(username, {})
+    except FileNotFoundError:
+        return {}
+
 class SettingsScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.layout = BoxLayout(orientation="vertical", padding=20, spacing=10)
         self.add_widget(self.layout)
 
-        # Accesăm datele din sesiune
-        session = App.get_running_app().session
+        session = load_active_user()
 
         self.profile_label = Label(text="No profile picture selected")
         self.layout.add_widget(Label(text="Settings", font_size=24))
-        self.layout.add_widget(Label(text=f"Username: {session.username}", font_size=18))
-        self.layout.add_widget(Label(text=f"Email: {session.email}", font_size=18))
+        self.layout.add_widget(Label(text=f"Username: {session.get('username', '(necunoscut)')}", font_size=18))
+        self.layout.add_widget(Label(text=f"Email: {session.get('email', '(necunoscut)')}", font_size=18))
         self.layout.add_widget(self.profile_label)
 
-        # Afișăm poza dacă există
-        if session.profile_picture and os.path.exists(session.profile_picture):
-            self.update_profile_picture(session.profile_picture)
+        profile_path = session.get("profile_picture", "")
+        if profile_path and os.path.exists(profile_path):
+            self.update_profile_picture(profile_path)
 
         choose_button = Button(text="Alege poza de profil", size_hint=(None, None), width=200, height=50)
         choose_button.bind(on_press=self.choose_profile_picture)
@@ -339,6 +359,8 @@ class SettingsScreen(Screen):
         remove_button = Button(text="Șterge poza de profil", size_hint=(None, None), width=200, height=50)
         remove_button.bind(on_press=self.remove_profile_picture)
         self.layout.add_widget(remove_button)
+
+        self.session_data = session  # păstrezi datele în obiect pentru salvări viitoare
 
     def choose_profile_picture(self, instance):
         content = BoxLayout(orientation="vertical", spacing=10, padding=10)
@@ -352,9 +374,14 @@ class SettingsScreen(Screen):
         def set_image(_):
             if chooser.selection:
                 selected = chooser.selection[0]
-                app = App.get_running_app()
-                app.session.profile_picture = selected
-                app.session.save()
+                self.session_data["profile_picture"] = selected
+                all_users = load_user_credentials()
+                username = self.session_data.get("username")
+                if username in all_users:
+                    all_users[username]["profile_picture"] = selected
+                    with open("user_credentials.json", "w") as f:
+                        import json
+                        json.dump(all_users, f, indent=4)
                 self.update_profile_picture(selected)
                 popup.dismiss()
 
@@ -383,13 +410,17 @@ class SettingsScreen(Screen):
             self.profile_label.text = f"Eroare: {e}"
 
     def remove_profile_picture(self, instance):
-        app = App.get_running_app()
-        app.session.profile_picture = ""
-        app.session.save()
+        self.session_data["profile_picture"] = ""
+        all_users = load_user_credentials()
+        username = self.session_data.get("username")
+        if username in all_users:
+            all_users[username]["profile_picture"] = ""
+            with open("user_credentials.json", "w") as f:
+                import json
+                json.dump(all_users, f, indent=4)
 
         if hasattr(self, "profile_img"):
             self.layout.remove_widget(self.profile_img)
-
         self.profile_label.text = "No profile picture selected"
 class NavigateScreen(Screen):
     def __init__(self,option, user_data, user_input, user_mail,**kwargs):
@@ -473,12 +504,11 @@ class OptionsScreen(Screen):
         grid.bind(minimum_height=grid.setter('height'))
 
         for i in range(7):
-            btn_text = f"Exercițiu {i + 1}"
-            btn = Button(text=btn_text, size_hint_y=None, height=80)
+           btn_text = f"Exercițiu {i + 1}"
+           btn = Button(text=btn_text, size_hint_y=None, height=80)
+           btn.bind(on_press=self.create_handler(i))
+           grid.add_widget(btn)
 
-            # Assign button logic based on planet and option
-            btn.bind(on_press=lambda instance, index=i: self.handle_exercise(index))
-            grid.add_widget(btn)
 
         scroll.add_widget(grid)
         main_layout.add_widget(scroll)
@@ -489,6 +519,11 @@ class OptionsScreen(Screen):
         main_layout.add_widget(undo)
 
         self.add_widget(main_layout)
+    def create_handler(self, index):
+       def handler(instance):
+           self.handle_exercise(index)
+       return handler
+
 
     def handle_exercise(self, i):
       print(f"Exercițiu {i + 1} selectat pentru {self.planet_name} - {self.selected_option}")
@@ -500,41 +535,41 @@ class OptionsScreen(Screen):
         question = questions_cpp1[i]
         code = code_cpp1[i]
         answers = answers_cpp1[i]
-        correct = answers[0]  
+        correct = answers[i]  
       elif self.planet_name == "Uranus" and self.selected_option == "C++":
           question = questions_cpp[i]
           answers = answers_cpp[i]
-          correct = correct_answers_cpp[0]
+          correct = correct_answers_cpp[i]
       elif self.planet_name == "Venus" and self.selected_option == "C++":
           question = questions_cpp_code[i]
           answers = answers_cpp_code[i]
-          correct = correct_answers_cpp[0]
+          correct = correct_answers_cpp[i]
       elif self.planet_name == "Uranus" and self.selected_option == "Python":
           question = questions_python[i]
           answers = answers_python[i]
-          correct = correct_answers_python[0]
+          correct = correct_answers_python[i]
       elif self.planet_name == "Venus" and self.selected_option == "Python":
           question = questions_python_b[i]
           answers = answers_python_b[i]
-          correct = correct_answers_python_b[0]
+          correct = correct_answers_python_b[i]
       elif self.planet_name == "Saturn" and self.selected_option == "Python":
         question = questions_python_c[i]
         code = code_samples_python_c[i]
         answers = answers_python_c[i]
-        correct = correct_answers_python_c[0]  
+        correct = correct_answers_python_c[i]  
       elif self.planet_name == "Uranus" and self.selected_option == "JavaScript":
           question = questions_javascript_a[i]
           answers = answers_javascript_a[i]
-          correct = correct_answers_javascript_a[0]
+          correct = correct_answers_javascript_a[i]
       elif self.planet_name == "Venus" and self.selected_option == "JavaScript":
           question = questions_javascript_code[i]
           answers = answers_javascript_code[i]
-          correct = correct_answers_javascript_code[0]
+          correct = correct_answers_javascript_code[i]
       elif self.planet_name == "Saturn" and self.selected_option == "JavaScript":
         question = questions_javascript_error[i]
         code = code_samples_javascript_error[i]
         answers = answers_javascript_error[i]
-        correct = correct_answers_javascript_error[0]
+        correct = correct_answers_javascript_error[i]
       else:
         print("❌ Nicio întrebare disponibilă pentru combinația selectată.")
         return
@@ -548,10 +583,12 @@ class OptionsScreen(Screen):
             'option': self.selected_option
         }
 
-        # Create and switch to the question screen
-      question_screen = QuestionScreen(question_data, name='question')
+      if self.manager.has_screen("question"):
+         self.manager.remove_widget(self.manager.get_screen("question"))
+
+      question_screen = QuestionScreen(question_data, name="question")
       self.manager.add_widget(question_screen)
-      self.manager.current = 'question'
+      self.manager.current = "question"
 questions_javascript_code = [
     "Cum declarăm o funcție anonimă în JavaScript?",
     "Care este sintaxa corectă pentru Arrow Function?",
@@ -899,7 +936,23 @@ class QuestionScreen(Screen):
 
 def save_progress():
     global user_progress
+
     print("Progres salvat:", user_progress)
+
+    active = load_active_user()
+    username = active.get("username")
+    if not username:
+        print("❌ Niciun utilizator activ!")
+        return
+
+    all_users = load_user_credentials()
+    if username in all_users:
+        all_users[username]["progress"] = user_progress
+        with open("user_credentials.json", "w") as f:
+            json.dump(all_users, f, indent=4)
+        print(f"✅ Progres salvat pentru: {username}")
+    else:
+        print(f"❌ Utilizatorul {username} nu există în baza de date.")
 def show_progress_kivy():
     global user_progress
     progress_message = "Progresul tău:\n"
@@ -957,25 +1010,24 @@ def show_leaderboard():
     close_btn.bind(on_release=popup.dismiss)
     popup.open()
 def open_profile_popup():
-    app = App.get_running_app()
-    session = app.session
-    session = App.get_running_app().session
+    session = load_active_user()
+
     layout = BoxLayout(orientation='vertical', spacing=15, padding=20)
     title = Label(text="Profile", font_size=24)
-
     layout.add_widget(title)
 
-    if session.profile_picture and os.path.exists(session.profile_picture):
+    image_path = session.get("profile_picture", "")
+    if image_path and os.path.exists(image_path):
         try:
-            pil_image = Image.open(session.profile_picture).convert("RGBA")
+            pil_image = PILImage.open(image_path).convert("RGBA")
             size = min(pil_image.size)
-            mask = Image.new('L', (size, size), 0)
+            mask = PILImage.new('L', (size, size), 0)
             draw = ImageDraw.Draw(mask)
             draw.ellipse((0, 0, size, size), fill=255)
             cropped = pil_image.crop((0, 0, size, size))
             cropped.putalpha(mask)
-
             cropped = cropped.resize((100, 100))
+
             img_data = cropped.tobytes()
             texture = Texture.create(size=cropped.size, colorfmt='rgba')
             texture.blit_buffer(img_data, colorfmt='rgba', bufferfmt='ubyte')
@@ -983,47 +1035,56 @@ def open_profile_popup():
             img_widget = KivyImage(texture=texture, size_hint=(None, None), size=(100, 100))
             layout.add_widget(img_widget)
         except Exception as e:
-            layout.add_widget(Label(text="⚠️ Eroare la încărcarea pozei"))
+            layout.add_widget(Label(text=f"⚠️ Eroare la poză: {e}"))
     else:
         layout.add_widget(Label(text="(Nicio poză de profil selectată)"))
 
-    layout.add_widget(Label(text=f"Username: {session.username}", font_size=18))
-    layout.add_widget(Label(text=f"E-mail: {session.email}", font_size=18))
+    layout.add_widget(Label(text=f"Username: {session.get('username', '(necunoscut)')}", font_size=18))
+    layout.add_widget(Label(text=f"E-mail: {session.get('email', '(necunoscut)')}", font_size=18))
 
     close_btn = Button(text="Închide", size_hint=(1, None), height=40)
-    close_btn.bind(on_release=lambda x: popup.dismiss())
+    popup = Popup(title="Profil", content=layout, size_hint=(0.8, 0.8), auto_dismiss=False)
+    close_btn.bind(on_release=popup.dismiss)
     layout.add_widget(close_btn)
 
-    popup = Popup(title="Profil",
-                  content=layout,
-                  size_hint=(0.8, 0.8),
-                  auto_dismiss=False)
     popup.open()
+
 class RankingScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         layout = BoxLayout(orientation="vertical", spacing=10, padding=20)
-
-        user_data = user_data_manager.load_user_data()
-        sorted_users = sorted(
-            user_data.items(),
-            key=lambda item: item[1].get("score", 0),
-            reverse=True
-        )
-
         layout.add_widget(Label(text="🏆 Clasament Utilizatori", font_size=24))
 
-        for idx, (email, data) in enumerate(sorted_users, start=1):
-            line = f"{idx}. {data.get('username', 'N/A')} - {data.get('score', 0)} puncte"
-            layout.add_widget(Label(text=line, font_size=18))
+        user_data = load_user_credentials()
+        active = load_active_user()
+        active_username = active.get("username")
 
-        back_button = Button(text="Înapoi", size_hint=(0.3, 0.1))
-        back_button.bind(on_press=self.go_to_main)
-        layout.add_widget(back_button)
+        ranked_users = []
+
+        for username, data in user_data.items():
+            progress = data.get("progress", {})  # tip: {'Python': {'Venus': 2, 'Saturn': 1}, ...}
+            total_score = 0
+            for planet_data in progress.values():  # parcurge fiecare limbaj (Python, C++)
+                total_score += sum(planet_data.values())
+            ranked_users.append((username, data.get("email", ""), total_score))
+
+        # sortează descrescător după punctaj
+        ranked_users.sort(key=lambda x: x[2], reverse=True)
+
+        for idx, (username, email, score) in enumerate(ranked_users, start=1):
+            label = Label(text=f"{idx}. {username} — {score} puncte", font_size=18)
+            if username == active_username:
+                label.color = (1, 0.84, 0, 1)  # evidențiază utilizatorul activ cu galben
+            layout.add_widget(label)
+
+        back_btn = Button(text="Înapoi", size_hint=(0.3, 0.1))
+        back_btn.bind(on_press=self.go_back)
+        layout.add_widget(back_btn)
 
         self.add_widget(layout)
-    def go_to_main(self, instance):
-           self.manager.current = "main_screen"
+
+    def go_back(self, instance):
+        self.manager.current = "main_screen"
 
 class MyApp(App):
     def build(self):
