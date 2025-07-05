@@ -64,7 +64,7 @@ class ImageScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.layout = BoxLayout(orientation="vertical")
-        self.default_image_path = r"C:\Users\Adriana\infoeducatie.2-3\infoeducatie.2-5\kivy v19\videos\WhatsApp Image 2025-07-02 at 21.02.56_71248b74(1).png"  # imagine implicită
+        self.default_image_path = r"videos\WhatsApp Image 2025-07-02 at 21.02.56_71248b74(1).png"  # imagine implicită
         self.add_widget(self.layout)
 
         if not os.path.exists(self.default_image_path):
@@ -106,7 +106,7 @@ class LoginScreen(Screen):
         self.add_widget(self.layout)
 
         # 🎬 Video pe fundal
-        self.image_path = r"C:\Users\Adriana\infoeducatie.2-3\infoeducatie.2-5\kivy v19\videos\WhatsApp Image 2025-07-02 at 21.05.20_a0c9f2ee.png"
+        self.image_path = r"videos\WhatsApp Image 2025-07-02 at 21.05.20_a0c9f2ee.png"
         if os.path.exists(self.image_path):
            self.image_widget = Image(source=self.image_path, allow_stretch=True, keep_ratio=True)
            self.layout.add_widget(self.image_widget)
@@ -174,7 +174,7 @@ class GridScreen(Screen):
         super().__init__(**kwargs)
         self.layout = FloatLayout()
 
-        self.video_path = r"C:\Users\Adriana\infoeducatie.2-3\infoeducatie.2\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
+        self.video_path = r"videos\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
         if os.path.exists(self.video_path):
             self.video_player = VideoPlayer(source=self.video_path, play=True, options={"eos": "loop"}, size_hint=(1, 1), pos_hint={"x": 0, "y": 0})
             self.video_player.allow_fullscreen = False
@@ -226,16 +226,16 @@ class MainScreen(Screen):
 
         # Adaugă conținut în layout
         # 🎥 Video pe fundal
-        self.image_path = r"C:\Users\Adriana\infoeducatie.2-3\infoeducatie.2-5\kivy v19\videos\WhatsApp Image 2025-07-02 at 21.05.20_a0c9f2ee.png"
+        self.image_path = r"videos\WhatsApp Image 2025-07-02 at 21.05.20_a0c9f2ee.png"
         if os.path.exists(self.image_path):
            self.image_widget = Image(source=self.image_path, allow_stretch=True, keep_ratio=True)
            self.layout.add_widget(self.image_widget)
         
         # 📍 Sigle și butoane
         languages = [
-            ("C++", "C:\\Users\\Adriana\\Desktop\\grid\\ISO_C++_Logo.svg(1).png"), 
-            ("Python", "C:\\Users\\Adriana\\Desktop\\grid\\Python.svg(1).png"),
-            ("JavaScript", "C:\\Users\\Adriana\\Desktop\\grid\\1698604163003(1).png")
+            ("C++", "images\\ISO_C++_Logo.svg(1).png"), 
+            ("Python", "images\\Python.svg(1).png"),
+            ("JavaScript", "images\\1698604163003(1).png")
         ]
         x_positions = [0.15, 0.4, 0.65]
 
@@ -427,7 +427,7 @@ class NavigateScreen(Screen):
         self.add_widget(self.root_layout)
 
         # 🌄 Background image
-        self.image_path = r"C:\Users\Adriana\infoeducatie.2-3\infoeducatie.2-5\kivy v19\videos\WhatsApp Image 2025-07-02 at 21.05.20_a0c9f2ee.png"
+        self.image_path = r"videos\WhatsApp Image 2025-07-02 at 21.05.20_a0c9f2ee.png"
         if os.path.exists(self.image_path):
             bg_image = Image(
                 source=self.image_path,
@@ -468,9 +468,9 @@ class NavigateScreen(Screen):
 
         # 🪐 Planet buttons
         planet_images = {
-            "Uranus": "C:/Users/Adriana/infoeducatie.2-2/Uranus(1).png",
-            "Venus": "C:/Users/Adriana/infoeducatie.2-2/Venus.png",
-            "Saturn": "C:/Users/Adriana/infoeducatie.2-2/Saturn.png"
+            "Uranus": "images/Uranus(1).png",
+            "Venus": "images/Venus.png",
+            "Saturn": "images/Saturn.png"
         }
         planet_buttons = BoxLayout(size_hint=(1, 0.3))
         for planet_name, image_path in planet_images.items():
@@ -926,10 +926,10 @@ class QuestionScreen(Screen):
          button.background_color = (0, 1, 0, 1)
          user_progress.setdefault(option, {}).setdefault(planet, 0)
          user_progress[option][planet] += 1
-         image_path = r"C:\Users\Adriana\infoeducatie.2-3\infoeducatie.2-5\kivy v19\videos\WhatsApp Image 2025-07-02 at 21.05.19_cbdddd93.png"
+         image_path = r"videos\WhatsApp Image 2025-07-02 at 21.05.19_cbdddd93.png"
         else:
          button.background_color = (1, 0, 0, 1)
-         image_path = r"C:\Users\Adriana\infoeducatie.2-3\infoeducatie.2-5\kivy v19\videos\WhatsApp Image 2025-07-02 at 21.05.16_69541a07.png"
+         image_path = r"videos\WhatsApp Image 2025-07-02 at 21.05.16_69541a07.png"
 
          save_progress()
 
