@@ -24,7 +24,15 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.filechooser import FileChooserListView
 from kivy.uix.floatlayout import FloatLayout
 from kivy.resources import resource_find
+def load_notes():
+    if os.path.exists("notes.json"):
+        with open("notes.json", "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
 
+def save_notes(notes):
+    with open("notes.json", "w", encoding="utf-8") as f:
+        json.dump(notes, f, indent=4, ensure_ascii=False)
 def load_user_credentials():
     try:
         with open("user_credentials.json","r") as f:
@@ -359,7 +367,10 @@ class SettingsScreen(Screen):
         remove_button = Button(text="Șterge poza de profil", size_hint=(None, None), width=200, height=50)
         remove_button.bind(on_press=self.remove_profile_picture)
         self.layout.add_widget(remove_button)
-
+        
+        undo_button = Button(text="Undo", size_hint=(None, None), width=200, height=50)
+        undo_button.bind(on_press=lambda instance: setattr(self.manager, "current", "main_screen"))
+        self.layout.add_widget(undo_button)
         self.session_data = session  # păstrezi datele în obiect pentru salvări viitoare
 
     def choose_profile_picture(self, instance):
@@ -462,7 +473,8 @@ class NavigateScreen(Screen):
             planet_images = {
             "Uranus": "C:/Users/Adriana/infoeducatie.2-2/Uranus(1).png",
             "Venus": "C:/Users/Adriana/infoeducatie.2-2/Venus.png",
-            "Saturn": "C:/Users/Adriana/infoeducatie.2-2/Saturn.png"
+            "Saturn": "C:/Users/Adriana/infoeducatie.2-2/Saturn.png",
+            "Mercur": "C:/Users/Adriana/infoeducatie.2-3/infoeducatie.2-5/kivy v19/images/Uranus(1).png"
             }
             planet_buttons = BoxLayout(size_hint=(1,0.3))
             for planet_name, image_path in planet_images.items():
@@ -482,10 +494,17 @@ class NavigateScreen(Screen):
             self.add_widget(layout)
             
     def switch_to_navigate(self, planet_name):
-      screen_name = f"options_screen_{planet_name}_{self.option}"
-      if not self.manager.has_screen(screen_name):
-        self.manager.add_widget(OptionsScreen(planet_name, self.option, name=screen_name))
+      if planet_name == "Mercur":
+        screen_name = f"code_screen_{self.option}"
+        if not self.manager.has_screen(screen_name):
+            self.manager.add_widget(CodeChallengeScreen(self.option, name=screen_name))
         self.manager.current = screen_name
+      else:
+        screen_name = f"options_screen_{planet_name}_{self.option}"
+        if not self.manager.has_screen(screen_name):
+            self.manager.add_widget(OptionsScreen(planet_name, self.option, name=screen_name))
+        self.manager.current = screen_name
+
 
 class OptionsScreen(Screen):
     def __init__(self, planet_name, selected_option, **kwargs):
@@ -513,12 +532,38 @@ class OptionsScreen(Screen):
         scroll.add_widget(grid)
         main_layout.add_widget(scroll)
 
-        # Undo button
+        notes_button = Button(text = "Notite", size_hint = (None,None), size = (200,50))
+        notes_button.bind(on_press = self.open_notes_popup)
+        main_layout.add_widget(notes_button)
         undo = Button(text="Undo", size_hint=(None, None), size=(200, 50))
         undo.bind(on_press=lambda x: setattr(self.manager, "current", "navigate_screen_" + self.selected_option))
         main_layout.add_widget(undo)
 
         self.add_widget(main_layout)
+    def open_notes_popup(self, instance):
+       key = f"{self.planet_name}_{self.selected_option}"
+       all_notes = load_notes()
+       current_note = all_notes.get(key, "")
+
+       layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
+       text_input = TextInput(text=current_note, multiline=True, size_hint=(1, 0.9))
+       save_btn = Button(text="💾 Salvează", size_hint=(1, 0.1))
+
+       layout.add_widget(text_input)
+       layout.add_widget(save_btn)
+
+       popup = Popup(title=f"Notițe pentru {self.planet_name} - {self.selected_option}",
+                  content=layout,
+                  size_hint=(0.9, 0.9),
+                  auto_dismiss=True)
+       def save_and_close(_):
+           all_notes[key] = text_input.text
+           save_notes(all_notes)
+           popup.dismiss()
+
+       save_btn.bind(on_press=save_and_close)
+       popup.open()
+
     def create_handler(self, index):
        def handler(instance):
            self.handle_exercise(index)
@@ -1085,6 +1130,218 @@ class RankingScreen(Screen):
 
     def go_back(self, instance):
         self.manager.current = "main_screen"
+code_questions = {
+    "Python": [
+        {
+            "prompt": "Scrie o funcție care returnează 5 + 3",
+            "template": "def aduna():\n    return ...",
+            "function": "aduna",
+            "expected": 8
+        },
+        {
+            "prompt": "Scrie o funcție care returnează lungimea cuvântului 'cosmic'",
+            "template": "def lungime():\n    return ...",
+            "function": "lungime",
+            "expected": 6
+        },
+        {
+            "prompt": "Scrie o funcție care returnează lista [1, 2, 3] inversată",
+            "template": "def invers():\n    return ...",
+            "function": "invers",
+            "expected": [3, 2, 1]
+        },
+        {
+            "prompt": "Scrie o funcție care returnează True dacă 7 este prim",
+            "template": "def este_prim():\n    return ...",
+            "function": "este_prim",
+            "expected": True
+        },
+        {
+            "prompt": "Scrie o funcție care returnează suma numerelor din [1, 2, 3]",
+            "template": "def suma():\n    return ...",
+            "function": "suma",
+            "expected": 6
+        },
+        {
+            "prompt": "Scrie o funcție care returnează 'Hello, Adriana!'",
+            "template": "def salut():\n    return ...",
+            "function": "salut",
+            "expected": "Hello, Adriana!"
+        },
+        {
+            "prompt": "Scrie o funcție care returnează pătratul lui 4",
+            "template": "def patrat():\n    return ...",
+            "function": "patrat",
+            "expected": 16
+        }
+    ],
+    "C++": [
+        {
+            "prompt": "Simulează în Python: returnează suma a două numere întregi (5 + 10)",
+            "template": "def suma():\n    return ...",
+            "function": "suma",
+            "expected": 15
+        },
+        {
+            "prompt": "Simulează în Python: returnează caracterul 'A'",
+            "template": "def caracter():\n    return ...",
+            "function": "caracter",
+            "expected": 'A'
+        },
+        {
+            "prompt": "Simulează în Python: returnează valoarea booleană true",
+            "template": "def adevarat():\n    return ...",
+            "function": "adevarat",
+            "expected": True
+        },
+        {
+            "prompt": "Simulează în Python: returnează lungimea stringului 'C++'",
+            "template": "def lungime():\n    return ...",
+            "function": "lungime",
+            "expected": 3
+        },
+        {
+            "prompt": "Simulează în Python: returnează lista [10, 20, 30]",
+            "template": "def vector():\n    return ...",
+            "function": "vector",
+            "expected": [10, 20, 30]
+        },
+        {
+            "prompt": "Simulează în Python: returnează 2 la puterea 3",
+            "template": "def putere():\n    return ...",
+            "function": "putere",
+            "expected": 8
+        },
+        {
+            "prompt": "Simulează în Python: returnează diferența 100 - 25",
+            "template": "def diferenta():\n    return ...",
+            "function": "diferenta",
+            "expected": 75
+        }
+    ],
+    "JavaScript": [
+        {
+            "prompt": "Scrie o funcție care returnează 'Hello, World!'",
+            "template": "def hello():\n    return ...",
+            "function": "hello",
+            "expected": "Hello, World!"
+        },
+        {
+            "prompt": "Scrie o funcție care returnează lungimea stringului 'JavaScript'",
+            "template": "def lungime():\n    return ...",
+            "function": "lungime",
+            "expected": 10
+        },
+        {
+            "prompt": "Scrie o funcție care returnează lista [1, 2, 3, 4].length",
+            "template": "def lungime_lista():\n    return ...",
+            "function": "lungime_lista",
+            "expected": 4
+        },
+        {
+            "prompt": "Scrie o funcție care returnează True dacă 10 > 5",
+            "template": "def comparatie():\n    return ...",
+            "function": "comparatie",
+            "expected": True
+        },
+        {
+            "prompt": "Scrie o funcție care returnează concatenarea 'JS' + '2025'",
+            "template": "def concat():\n    return ...",
+            "function": "concat",
+            "expected": "JS2025"
+        },
+        {
+            "prompt": "Scrie o funcție care returnează 3 * 3",
+            "template": "def inmultire():\n    return ...",
+            "function": "inmultire",
+            "expected": 9
+        },
+        {
+            "prompt": "Scrie o funcție care returnează valoarea booleană False",
+            "template": "def fals():\n    return ...",
+            "function": "fals",
+            "expected": False
+        }
+    ]
+}
+
+
+class CodeChallengeScreen(Screen):
+    def __init__(self, selected_option, **kwargs):
+        super().__init__(**kwargs)
+        self.selected_option = selected_option
+        self.questions = code_questions[selected_option]
+        self.current_index = 0
+
+        self.layout = BoxLayout(orientation="vertical", spacing=10, padding=20)
+        self.add_widget(self.layout)
+
+        self.question_label = Label(text="", font_size=20)
+        self.layout.add_widget(self.question_label)
+
+        self.code_input = TextInput(text="", multiline=True, size_hint=(1, 0.5))
+        self.layout.add_widget(self.code_input)
+
+        self.result_label = Label(text="", font_size=18)
+        self.layout.add_widget(self.result_label)
+
+        run_button = Button(text="Rulează codul", size_hint=(1, 0.1))
+        run_button.bind(on_press=self.run_code)
+        self.layout.add_widget(run_button)
+
+        next_button = Button(text="Următoarea întrebare", size_hint=(1, 0.1))
+        next_button.bind(on_press=self.next_question)
+        self.layout.add_widget(next_button)
+
+        self.load_question()
+
+    def load_question(self):
+        q = self.questions[self.current_index]
+        self.question_label.text = f"Întrebarea {self.current_index + 1}: {q['prompt']}"
+        self.code_input.text = q['template']
+        self.result_label.text = ""
+
+    def run_code(self, instance):
+        q = self.questions[self.current_index]
+        user_code = self.code_input.text
+
+        import sys, io
+        old_stdout = sys.stdout
+        redirected_output = sys.stdout = io.StringIO()
+
+        try:
+           local_env = {}
+           exec(user_code, {}, local_env)
+
+           if q["function"] in local_env:
+             result = local_env[q["function"]]()
+             if result == q["expected"]:
+                self.result_label.text = "✅ Corect!"
+
+                # 🧠 Salvăm progresul pentru Mercur
+                global user_progress
+                user_progress.setdefault(self.selected_option, {}).setdefault("Mercur", 0)
+                user_progress[self.selected_option]["Mercur"] += 1
+                save_progress()
+
+             else:
+                self.result_label.text = f"❌ Ai returnat {result}, dar se aștepta {q['expected']}."
+           else:
+                self.result_label.text = f"❌ Nu ai definit funcția '{q['function']}'"
+
+        except Exception as e:
+            self.result_label.text = f"⚠️ Eroare: {e}"
+
+        finally:
+           sys.stdout = old_stdout
+
+    def next_question(self, instance):
+        if self.current_index < len(self.questions) - 1:
+            self.current_index += 1
+            self.load_question()
+        else:
+            self.result_label.text = "🎉 Ai terminat toate întrebările!"
+
 
 class MyApp(App):
     def build(self):
