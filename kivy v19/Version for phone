@@ -11,6 +11,7 @@ from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 import webbrowser
 from kivy.uix.popup import Popup
+from kivy.graphics import Color, Rectangle
 import os
 import sys
 import json
@@ -118,6 +119,11 @@ class LoginScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.layout = FloatLayout()
+        with self.layout.canvas.before:
+            Color(0.1, 0.1, 0.3, 1) 
+            self.bg_rect = Rectangle(size=self.layout.size, pos=self.layout.pos)
+
+        self.layout.bind(size=self.update_bg, pos=self.update_bg)
         self.add_widget(self.layout)
 
         # 🎬 Video pe fundal
@@ -154,7 +160,9 @@ class LoginScreen(Screen):
                               pos_hint={"center_x": 0.5, "center_y": 0.15})
         login_button.bind(on_press=self.login)
         self.layout.add_widget(login_button)
-
+    def update_bg(self, *args):
+        self.bg_rect.size = self.children[0].size
+        self.bg_rect.pos = self.children[0].pos
     def submit_username(self, instance):
         entered_username = self.username.text.strip()
         entered_password = self.password.text.strip()
@@ -236,8 +244,11 @@ class MainScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         layout = FloatLayout()
+        with layout.canvas.before:
+            Color(0.1, 0.1, 0.3, 1) 
+            self.bg_rect = Rectangle(size=layout.size, pos=layout.pos)
 
-        # 🎥 Video pe fundal
+        layout.bind(size=self.update_bg, pos=self.update_bg)
         video_path = "C:\\Users\\Adriana\\Desktop\\grid\\WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
         if os.path.exists(video_path):
             self.video = Video(source=video_path, play=True, allow_stretch=True, options={"eos": "loop"},
@@ -271,7 +282,7 @@ class MainScreen(Screen):
             layout.add_widget(img)
 
         # 🏆 Clasament
-        ranking_button = Button(text="Clasament", size_hint=(0.2, 0.1), pos_hint={"x": 0.7, "y": 0.85})
+        ranking_button = Button(text="Clasament", size_hint=(0.2, 0.1), pos_hint={"x": 0.7, "y": 0.85}, background_normal="", background_color= (0.6, 0.2, 0.8, 1), color=(1, 1, 1, 1))
         ranking_button.bind(on_press=self.go_to_ranking)
         layout.add_widget(ranking_button)
 
@@ -294,7 +305,9 @@ class MainScreen(Screen):
         layout.add_widget(setting_button)
 
         self.add_widget(layout)
-
+    def update_bg(self, *args):
+        self.bg_rect.size = self.children[0].size
+        self.bg_rect.pos = self.children[0].pos
     def switch_to_navigate(self, option):
         app = App.get_running_app()
         screen_name = f"navigate_screen_{option}"
@@ -346,10 +359,15 @@ class SettingsScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.layout = BoxLayout(orientation="vertical", padding=20, spacing=10)
+        with self.layout.canvas.before:
+            Color(0.1, 0.1, 0.3, 1) 
+            self.bg_rect = Rectangle(size=self.layout.size, pos=self.layout.pos)
+
+        self.layout.bind(size=self.update_bg, pos=self.update_bg)
         self.add_widget(self.layout)
 
         session = load_active_user()
-
+        
         self.profile_label = Label(text="No profile picture selected")
         self.layout.add_widget(Label(text="Settings", font_size=24))
         self.layout.add_widget(Label(text=f"Username: {session.get('username', '(necunoscut)')}", font_size=18))
@@ -372,7 +390,9 @@ class SettingsScreen(Screen):
         undo_button.bind(on_press=lambda instance: setattr(self.manager, "current", "main_screen"))
         self.layout.add_widget(undo_button)
         self.session_data = session  # păstrezi datele în obiect pentru salvări viitoare
-
+    def update_bg(self, *args):
+        self.bg_rect.size = self.children[0].size
+        self.bg_rect.pos = self.children[0].pos
     def choose_profile_picture(self, instance):
         content = BoxLayout(orientation="vertical", spacing=10, padding=10)
         chooser = FileChooserListView(filters=["*.png", "*.jpg", "*.jpeg"], size_hint=(1, 0.9))
@@ -436,17 +456,23 @@ class SettingsScreen(Screen):
 class NavigateScreen(Screen):
     def __init__(self,option, user_data, user_input, user_mail,**kwargs):
         super().__init__(**kwargs)
+        self.layout = FloatLayout() 
         session = App.get_running_app().session
         self.option = option 
         user = session.username
         mail = session.email
         poza = session.profile_picture
-        layout = BoxLayout(orientation = "vertical")
+        with self.layout.canvas.before:
+            Color(0.1, 0.1, 0.3, 1) 
+            self.bg_rect = Rectangle(size=self.layout.size, pos=self.layout.pos)
+
+        self.layout.bind(size=self.update_bg, pos=self.update_bg)
+
         app = App.get_running_app()
         video_path = "C:/Users/Adriana/Desktop/grid/WhatsApp Video 2025-04-05 at 20.39.03_78657a3f.mp4"
         if os.path.exists(video_path):
             self.video_player = Video(source = video_path, state="play", options = {"eos":"loop"})
-            layout.add_widget(self.video_player)
+            self.layout.add_widget(self.video_player)
 
             top_buttons = BoxLayout(size_hint=(1, 0.1))
             progress_btn = Button(text = "Progress", size_hint=(None, None), width =150, height=50)
@@ -459,7 +485,7 @@ class NavigateScreen(Screen):
             top_buttons.add_widget(leaderboard_btn)
             top_buttons.add_widget(profile_btn)
 
-            layout.add_widget(top_buttons)
+            self.layout.add_widget(top_buttons)
 
             link_map= {
                 "C++": "https://www.w3schools.com/cpp/cpp_syntax.asp",
@@ -469,12 +495,12 @@ class NavigateScreen(Screen):
             if self.option in link_map:
                 theory_btn = Button(text=f"Teorie {self.option}", size_hint=(None, None), width=200, height=50)
                 theory_btn.bind(on_press=lambda instance: webbrowser.open(link_map[self.option]))
-                layout.add_widget(theory_btn)
+                self.layout.add_widget(theory_btn)
             planet_images = {
             "Uranus": "C:/Users/Adriana/infoeducatie.2-2/Uranus(1).png",
             "Venus": "C:/Users/Adriana/infoeducatie.2-2/Venus.png",
             "Saturn": "C:/Users/Adriana/infoeducatie.2-2/Saturn.png",
-            "Mercur": "C:/Users/Adriana/infoeducatie.2-3/infoeducatie.2-5/kivy v19/images/Uranus(1).png"
+            "Mercur": "C:/Users/Adriana/infoeducatie.2-3/infoeducatie.2-5/kivy v19/images/Mercur.png"
             }
             planet_buttons = BoxLayout(size_hint=(1,0.3))
             for planet_name, image_path in planet_images.items():
@@ -485,14 +511,16 @@ class NavigateScreen(Screen):
                     planet_buttons.add_widget(img)
                     planet_buttons.add_widget(btn)
             
-            layout.add_widget(planet_buttons)
+            self.layout.add_widget(planet_buttons)
 
             undo_button = Button(text="Undo", size_hint=(None, None), width=200, height=50)
             undo_button.bind(on_press=lambda instance: setattr(self.manager, "current", "main_screen"))
-            layout.add_widget(undo_button)
-
-            self.add_widget(layout)
-            
+            self.layout.add_widget(undo_button)
+        
+            self.add_widget(self.layout) 
+    def update_bg(self, *args):
+                 self.bg_rect.size = self.children[0].size
+                 self.bg_rect.pos = self.children[0].pos     
     def switch_to_navigate(self, planet_name):
       if planet_name == "Mercur":
         screen_name = f"code_screen_{self.option}"
@@ -509,11 +537,16 @@ class NavigateScreen(Screen):
 class OptionsScreen(Screen):
     def __init__(self, planet_name, selected_option, **kwargs):
         super().__init__(**kwargs)
+        self.main_layout = FloatLayout() 
         self.planet_name = planet_name
         self.selected_option = selected_option
 
         main_layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
+        with self.main_layout.canvas.before:
+            Color(0.1, 0.1, 0.3, 1) 
+            self.bg_rect = Rectangle(size=self.main_layout.size, pos=self.main_layout.pos)
 
+        self.main_layout.bind(size=self.update_bg, pos=self.update_bg)
         title = Label(text=f"Options for {planet_name}", font_size=24, size_hint=(1, None), height=60)
         main_layout.add_widget(title)
 
@@ -540,6 +573,9 @@ class OptionsScreen(Screen):
         main_layout.add_widget(undo)
 
         self.add_widget(main_layout)
+    def update_bg(self, *args):
+                 self.bg_rect.size = self.children[0].size
+                 self.bg_rect.pos = self.children[0].pos   
     def open_notes_popup(self, instance):
        key = f"{self.planet_name}_{self.selected_option}"
        all_notes = load_notes()

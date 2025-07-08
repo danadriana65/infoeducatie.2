@@ -78,7 +78,16 @@ class ImageScreen(Screen):
             self.layout.add_widget(select_button)
         else:
             self.show_image(self.default_image_path)
+        skip_button = Button(
+            text="Continue to Login",
+            size_hint=(0.4, 0.1),
+            pos_hint={"center_x": 0.5, "y": 0.05},
+            on_press=self.skip_to_login
+        )
+        self.layout.add_widget(skip_button)
 
+    def skip_to_login(self, instance):
+        self.manager.current = "login_screen"
     def select_custom_image(self, instance):
         if self.file_chooser.selection:
             selected = self.file_chooser.selection[0]
